@@ -7,16 +7,6 @@ var tables = encrypt.getTable(KEY);
 var encryptTable = tables[0];
 var decryptTable = tables[1];
 
-function appendBuffer(left, right) {
-    if (buf == null) {
-        return right;
-    }
-    var buf = new Buffer(left.length + right.length);
-    left.copy(buf, 0);
-    right.copy(buf, left.length);
-    return buf;
-}
-
 function inetNtoa(buf) {
     return buf[0] + '.' + buf[1] + '.' + buf[2] + '.' + buf[3];
 }
@@ -36,7 +26,7 @@ function inetAton(ipStr) {
 var server = net.createServer(function (connection) { //'connection' listener
     console.log('server connected');
 
-    var stage = 0, headerLength = 0, cmd = 0, remote = null, cachedPieces = [];
+    var stage = 0, headerLength = 0, remote = null, cachedPieces = [];
 
     connection.on('data', function (data) {
         encrypt.encrypt(decryptTable, data);
@@ -65,11 +55,16 @@ var server = net.createServer(function (connection) { //'connection' listener
                 // +----+-----+-------+------+----------+----------+
                 // | 1  |  1  | X'00' |  1   | Variable |    2     |
                 // +----+-----+-------+------+----------+----------+
-                var addrtype = 0, addrLen = 0, remoteAddr = null,
+                var addrLen = 0, remoteAddr = null,
                     remotePort = null;
                 // cmd and addrtype
-                cmd = data[1];
-                addrtype = data[3];
+                var cmd = data[1];
+                var addrtype = data[3];
+                if (cmd != 1) {
+                    console.log('unsupported cmd: ' + cmd);
+                    connection.end();
+                    return;
+                }
                 if (addrtype == 3) {
                     addrLen = data[4];
                 } else if (addrtype != 1) {
