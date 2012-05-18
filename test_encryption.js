@@ -24,11 +24,11 @@ function getTable(key) {
     // js doesn't support int64, so we have to break into 2 int32
     var al = hash.readUInt32LE(0);
     var ah = hash.readUInt32LE(4);
+    var i,k,j,t;
     for (i = 0; i < 256; i++) {
         table[i] = i;
     }
     for (i = 1; i < 1024; i++) {
-        var k,j,t;
         for (k = 256 - 2; k >= 0; --k) {
             for (j = 0; j <= k; ++j) {
                 if (pseudoRandomCompare(table[j], table[j + 1], i, ah, al) > 0) {
