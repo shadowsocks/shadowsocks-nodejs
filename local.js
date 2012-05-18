@@ -17,7 +17,12 @@ var server = net.createServer(function(connection) {
     });
     remote.on('data', function(data) {
         encrypt.encrypt(decryptTable, data);
-        connection.write(data);
+        if (!connection.write(data)) {
+            remote.pause();
+        }
+    });
+    remote.on('drain', function(data) {
+        connection.resume();
     });
     remote.on('end', function() {
         console.log('remote disconnected');
@@ -33,7 +38,12 @@ var server = net.createServer(function(connection) {
     });
     connection.on('data', function(data) {
         encrypt.encrypt(encryptTable, data);
-        remote.write(data);
+        if (!remote.write(data)) {
+            connection.pause();
+        }
+    });
+    connection.on('drain', function(data) {
+        remote.resume();
     });
     connection.on('error', function() {
         console.log('server error');

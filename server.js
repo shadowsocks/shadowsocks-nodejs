@@ -32,7 +32,9 @@ var server = net.createServer(function (connection) { //'connection' listener
         encrypt.encrypt(decryptTable, data);
         if (stage == 5) {
             // pipe sockets
-            remote.write(data);
+            if (!remote.write(data)) {
+                connection.pause();
+            }
             return;
         }
         if (stage == 0) {
@@ -105,7 +107,9 @@ var server = net.createServer(function (connection) { //'connection' listener
                 });
                 remote.on('data', function (data) {
                     encrypt.encrypt(encryptTable, data);
-                    connection.write(data);
+                    if (!connection.write(data)) {
+                        remote.pause();
+                    }
                 });
                 remote.on('end', function () {
                     console.log('remote disconnected');
@@ -114,6 +118,9 @@ var server = net.createServer(function (connection) { //'connection' listener
                 remote.on('error', function () {
                     console.log('remote error');
                     connection.end();
+                });
+                remote.on('drain', function () {
+                    connection.resume();
                 });
                 if (data.length > headerLength) {
                     // make sure no data is lost
@@ -145,6 +152,11 @@ var server = net.createServer(function (connection) { //'connection' listener
         console.log('server error');
         if (remote) {
             remote.end();
+        }
+    });
+    connection.on('drain', function () {
+        if (remote) {
+            remote.resume();
         }
     });
 });
