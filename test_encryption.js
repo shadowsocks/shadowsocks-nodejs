@@ -47,7 +47,7 @@ function getTable(key) {
 
 }
 var tbs = getTable(KEY);
-console.log(getTable(KEY));
+console.log(tbs);
 console.log(tbs[0][0]);
 console.log(tbs[0][1]);
 console.log(tbs[0][2]);
