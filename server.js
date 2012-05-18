@@ -36,25 +36,18 @@ function inetAton(ipStr) {
 var server = net.createServer(function (connection) { //'connection' listener
     console.log('server connected');
 
-    var stage = 0, headerBuf = null, receivedBytes = 0, headerLength = 0, mode = 0,
-        addrtype = 0, addrLen = 0, remoteAddr = null, remotePort = null,
-        remote = null;
-    var cachedPieces = [];
+    var stage = 0, headerLength = 0, cmd = 0, remote = null, cachedPieces = [];
 
     connection.on('data', function (data) {
+        encrypt.encrypt(decryptTable, data);
         if (stage == 5) {
-            console.log(5);
             // pipe sockets
-            encrypt.encrypt(decryptTable, data);
             remote.write(data);
             return;
         }
-        headerBuf = appendBuffer(headerBuf, data);
-        receivedBytes += data.length;
-        console.log('receivedByptes: ' + receivedBytes);
         if (stage == 0) {
-            console.log(0);
-            if (receivedBytes < 262) {
+            if (data.length != 3) {
+                connection.end();
                 return;
             } else {
                 var tempBuf = new Buffer(2);
@@ -62,91 +55,83 @@ var server = net.createServer(function (connection) { //'connection' listener
                 encrypt.encrypt(encryptTable, tempBuf);
                 connection.write(tempBuf);
                 stage = 1;
+                return;
             }
         }
         if (stage == 1) { // note this must be if, not else if!
-            console.log(1);
-            // mode and addrtype
-            if (receivedBytes < 267) {
-                return;
-            } else {
-                mode = headerBuf[264];
-                addrtype = headerBuf[266];
+            try {
+                // +----+-----+-------+------+----------+----------+
+                // |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
+                // +----+-----+-------+------+----------+----------+
+                // | 1  |  1  | X'00' |  1   | Variable |    2     |
+                // +----+-----+-------+------+----------+----------+
+                var addrtype = 0, addrLen = 0, remoteAddr = null,
+                    remotePort = null;
+                // cmd and addrtype
+                cmd = data[1];
+                addrtype = data[3];
                 if (addrtype == 3) {
-                    addrLen = headerBuf[266];
+                    addrLen = data[4];
                 } else if (addrtype != 1) {
+                    console.log('unsupported addrtype: ' + addrtype);
                     connection.end();
                     return;
                 }
-                stage = 2;
-            }
-        }
-        if (stage == 2) { // note this must be if, not else if!
-            console.log(2);
-            // read address and port
-            if (addrtype == 1) {
-                if (receivedBytes < 273) {
-                    return;
+                // read address and port
+                if (addrtype == 1) {
+                    remoteAddr = inetNtoa(data.slice(4, 8));
+                    remotePort = data.readUInt16BE(9);
+                    headerLength = 10;
                 } else {
-                    remoteAddr = inetNtoa(headerBuf.slice(267, 267 + 4));
-                    remotePort = headerBuf.readUInt16BE(271);
-                    headerLength = 273;
-                    stage = 3;
+                    remoteAddr = data.slice(5, 5 + addrLen).toString('binary');
+                    remotePort = data.readUInt16BE(5 + addrLen);
+                    headerLength = 5 + addrLen + 2;
                 }
-            } else {
-                if (receivedBytes < 267 + addrLen + 2) {
-                    return;
-                } else {
-                    remoteAddr = headerBuf.slice(267, 267 + addrLen).toString();
-                    remotePort = headerBuf.readUInt16BE(267 + addrLen);
-                    headerLength = 267 + addrLen + 2;
-                    stage = 3;
-                }
-            }
-        }
-        if (stage == 3) { // note this must be if, not else if!
-            console.log(3);
-            // connect remote server
-            remote = net.connect(remotePort, remoteAddr, function () { //'connect' listener
-                console.log('remote connected');
-                var ipBuf = inetAton(remote.remoteAddress);
-                if (ipBuf == null) {
+                // connect remote server
+                remote = net.connect(remotePort, remoteAddr, function () {
+                    console.log('connecting ' + remoteAddr);
+                    var ipBuf = inetAton(remote.remoteAddress);
+                    if (ipBuf == null) {
+                        connection.end();
+                        return;
+                    }
+                    var buf = new Buffer(10);
+                    buf.write('\x05\x00\x00\x01', 0, 4, 'binary');
+                    ipBuf.copy(buf, 4);
+                    buf.writeInt16BE(remote.remotePort, 8);
+                    encrypt.encrypt(encryptTable, buf);
+                    connection.write(buf);
+                    for (var i = 0; i < cachedPieces.length; i++) {
+                        var piece = cachedPieces[i];
+                        remote.write(piece);
+                    }
+                    cachedPieces = null; // save memory
+                    stage = 5;
+                });
+                remote.on('data', function (data) {
+                    encrypt.encrypt(encryptTable, data);
+                    connection.write(data);
+                });
+                remote.on('end', function () {
+                    console.log('remote disconnected');
                     connection.end();
-                    return;
+                });
+                remote.on('error', function () {
+                    console.log('remote error');
+                    connection.end();
+                });
+                if (data.length > headerLength) {
+                    // make sure no data is lost
+                    var buf = new Buffer(data.length - headerLength);
+                    data.copy(buf, 0, headerLength);
+                    cachedPieces.push(buf);
                 }
-                var buf = new Buffer(10);
-                buf.write(0, '\x05\x00\x00\x01', 'binary');
-                ipBuf.copy(buf, 4);
-                buf.writeInt16BE(remote.remotePort, 8);
-                encrypt.encrypt(encryptTable, buf);
-                connection.write(buf);
-                for (var i = 0; i < cachedPieces.length; i++) {
-                    var piece = cachedPieces[i];
-                    encrypt.encrypt(decryptTable, piece);
-                    remote.write(piece);
-                }
-                cachedPieces = null; // save memory
-                stage = 5;
-            });
-            remote.on('data', function (data) {
-                encrypt.encrypt(encryptTable, data);
-                connection.write(data);
-            });
-            remote.on('end', function () {
-                console.log('remote disconnected');
+                stage = 4;
+            } catch (e) {
+                // may encouter index out of range
+                console.log(e);
                 connection.end();
-            });
-            remote.on('error', function () {
-                console.log('remote error');
-                connection.end();
-            });
-            if (headerBuf.length > headerLength) {
-                // make sure no data is lost
-                var buf = new Buffer(headerBuf.length - headerLength);
-                headerBuf.copy(buf, 0, headerLength);
-                cachedPieces.push(buf);
             }
-            stage = 4;
         } else if (stage == 4) { // note this must be else if, not if!
             console.log(4);
             // remote server not connected
@@ -168,7 +153,7 @@ var server = net.createServer(function (connection) { //'connection' listener
         }
     });
 });
-server.listen(PORT, function () { //'listening' listener
+server.listen(PORT, function () {
     console.log('server bound');
 });
 

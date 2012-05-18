@@ -9,10 +9,10 @@ var tables = encrypt.getTable(KEY);
 var encryptTable = tables[0];
 var decryptTable = tables[1];
 
-var server = net.createServer(function(connection) { //'connection' listener
+var server = net.createServer(function(connection) {
     console.log('server connected');
 
-    var remote = net.connect(REMOTE_PORT, SERVER, function() { //'connect' listener
+    var remote = net.connect(REMOTE_PORT, SERVER, function() {
         console.log('remote connected');
     });
     remote.on('data', function(data) {
@@ -40,7 +40,7 @@ var server = net.createServer(function(connection) { //'connection' listener
         remote.end();
     });
 });
-server.listen(PORT, function() { //'listening' listener
+server.listen(PORT, function() {
     console.log('server bound');
 });
 
