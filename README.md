@@ -19,7 +19,7 @@ Put all the files on your server. Edit `server.js`, change the following values:
 
 Run `node server.js` on your server. To run it in the background, run `setsid node server.js`.
 
-Put `local.js` on your client machine. Edit `local.js`, change these values:
+Put all the files on your client machine. Edit `local.js`, change these values:
 
     SERVER        your server ip or hostname
     REMOTE_PORT   server port
