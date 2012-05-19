@@ -27,6 +27,7 @@ var KEY = 'foobar!';
 
 var net = require('net');
 var encrypt = require('./encrypt.js');
+console.log('calculating ciphers');
 var tables = encrypt.getTable(KEY);
 var encryptTable = tables[0];
 var decryptTable = tables[1];
@@ -73,6 +74,6 @@ var server = net.createServer(function(connection) {
     });
 });
 server.listen(PORT, function() {
-    console.log('server bound');
+    console.log('server listening at port ' + PORT);
 });
 
