@@ -26,8 +26,8 @@ function inetAton(ipStr) {
 var server = net.createServer(function (connection) { //'connection' listener
     console.log('server connected');
 
-    var stage = 0, headerLength = 0, remote = null, cachedPieces = [];
-
+    var stage = 0, headerLength = 0, remote = null, cachedPieces = [],
+        addrLen = 0, remoteAddr = null, remotePort = null;
     connection.on('data', function (data) {
         encrypt.encrypt(decryptTable, data);
         if (stage == 5) {
@@ -57,8 +57,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 // +----+-----+-------+------+----------+----------+
                 // | 1  |  1  | X'00' |  1   | Variable |    2     |
                 // +----+-----+-------+------+----------+----------+
-                var addrLen = 0, remoteAddr = null,
-                    remotePort = null;
+
                 // cmd and addrtype
                 var cmd = data[1];
                 var addrtype = data[3];
@@ -127,6 +126,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                     var buf = new Buffer(data.length - headerLength);
                     data.copy(buf, 0, headerLength);
                     cachedPieces.push(buf);
+                    buf = null;
                 }
                 stage = 4;
             } catch (e) {
