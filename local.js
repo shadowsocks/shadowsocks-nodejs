@@ -52,7 +52,7 @@ var server = net.createServer(function(connection) {
         connection.end();
     });
     remote.on('error', function() {
-        console.log('remote error');
+        console.warn('remote error');
         connection.end();
     });
     connection.on('end', function() {
@@ -69,11 +69,15 @@ var server = net.createServer(function(connection) {
         remote.resume();
     });
     connection.on('error', function() {
-        console.log('server error');
+        console.warn('server error');
         remote.end();
     });
 });
 server.listen(PORT, function() {
     console.log('server listening at port ' + PORT);
 });
-
+server.on('error', function (e) {
+  if (e.code == 'EADDRINUSE') {
+    console.warn('Address in use, aborting');
+  }
+});

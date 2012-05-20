@@ -138,7 +138,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                     connection.end();
                 });
                 remote.on('error', function () {
-                    console.log('remote error');
+                    console.warn('remote error');
                     connection.end();
                 });
                 remote.on('drain', function () {
@@ -154,7 +154,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 stage = 4;
             } catch (e) {
                 // may encouter index out of range
-                console.log(e);
+                console.warn(e);
                 connection.end();
             }
         } else if (stage == 4) { // note this must be else if, not if!
@@ -172,7 +172,7 @@ var server = net.createServer(function (connection) { //'connection' listener
         }
     });
     connection.on('error', function () {
-        console.log('server error');
+        console.warn('server error');
         if (remote) {
             remote.end();
         }
@@ -185,5 +185,10 @@ var server = net.createServer(function (connection) { //'connection' listener
 });
 server.listen(PORT, function () {
     console.log('server listening at port ' + PORT);
+});
+server.on('error', function (e) {
+  if (e.code == 'EADDRINUSE') {
+    console.warn('Address in use, aborting');
+  }
 });
 
