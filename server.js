@@ -85,14 +85,16 @@ var server = net.createServer(function (connection) { //'connection' listener
                 var cmd = data[1];
                 var addrtype = data[3];
                 if (cmd != 1) {
-                    console.log('unsupported cmd: ' + cmd);
-                    connection.end();
+                    console.warn('unsupported cmd: ' + cmd);
+                    var reply = new Buffer('\x05\x07\x00\x01', 'binary');
+                    encrypt.encrypt(encryptTable, reply);
+                    connection.end(reply);
                     return;
                 }
                 if (addrtype == 3) {
                     addrLen = data[4];
                 } else if (addrtype != 1) {
-                    console.log('unsupported addrtype: ' + addrtype);
+                    console.warn('unsupported addrtype: ' + addrtype);
                     connection.end();
                     return;
                 }
@@ -138,6 +140,13 @@ var server = net.createServer(function (connection) { //'connection' listener
                     connection.end();
                 });
                 remote.on('error', function () {
+                    if (stage == 4) {
+                        console.warn('remote connection refused');
+                        var reply = new Buffer('\x05\x05\x00\x01\x00\x00\x00\x00\x00\x00', 'binary');
+                        encrypt.encrypt(encryptTable, reply);
+                        connection.end(reply);
+                        return;
+                    }
                     console.warn('remote error');
                     connection.end();
                 });
