@@ -1,20 +1,33 @@
+/*
+ Copyright (c) 2012 clowwindy
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+
 var crypto = require('crypto');
+var merge_sort = require('./merge_sort.js').merge_sort;
 
 var int32Max = Math.pow(2, 32);
-// do a mod for large number
-// since js only support 2^53
-// div must be a very small number
-// function modInt64(high, low, div) {
-//     return ((high % div) * int32Max + low) % div;
-// }
-//
-// function pseudoRandomCompare(x, y, i, ah, al) {
-//     return modInt64(ah, al, x + i) - modInt64(ah, al, y + i);
-// }
 
 exports.getTable = function (key) {
-    var table = new Buffer(256);
-    var decrypt_table = new Buffer(256);
+    var table = new Array(256);
+    var decrypt_table = new Array(256);
     var md5sum = crypto.createHash('md5');
     md5sum.update(key);
     var hash = new Buffer(md5sum.digest(), 'binary');
@@ -25,20 +38,11 @@ exports.getTable = function (key) {
         table[i] = i;
     }
     for (var i = 1; i < 1024; i++) {
-        for (var k = 256 - 2; k >= 0; --k) {
-            for (var j = 0; j <= k; ++j) {
-                var x = table[j], y = table[j + 1];
-                // if (pseudoRandomCompare(table[j], table[j + 1], i, ah, al) > 0) {
-                // inline this calculation to make it 40% faster
-                if (((ah % (x + i)) * int32Max + al) % (x + i) -
-                    ((ah % (y + i)) * int32Max + al) % (y + i) > 0) {
-                    var t = table[j];
-                    table[j] = table[j + 1];
-                    table[j + 1] = t;
-                }
-            }
-        }
-    }
+        table = merge_sort(table, function(x, y) {
+ 			return ((ah % (x + i)) * int32Max + al) % (x + i) -
+                     ((ah % (y + i)) * int32Max + al) % (y + i);
+ 		});
+   }
     for (i = 0; i < 256; ++i) {
         // gen decrypt table from encrypt table
         decrypt_table[table[i]] = i;
