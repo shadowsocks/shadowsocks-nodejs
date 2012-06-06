@@ -64,17 +64,12 @@ var server = net.createServer(function (connection) { //'connection' listener
             return;
         }
         if (stage == 0) {
-            if (data.length != 3) {
-                connection.end();
-                return;
-            } else {
-                var tempBuf = new Buffer(2);
-                tempBuf.write('\x05\x00', 0);
+            var tempBuf = new Buffer(2);
+            tempBuf.write('\x05\x00', 0);
 //                encrypt.encrypt(encryptTable, tempBuf);
-                connection.write(tempBuf);
-                stage = 1;
-                return;
-            }
+            connection.write(tempBuf);
+            stage = 1;
+            return;
         }
         if (stage == 1) { // note this must be if, not else if!
             try {
