@@ -20,8 +20,8 @@
  SOFTWARE.
  */
 
-var PORT = 8499;
-var KEY = 'foobar!';
+var PORT = 8388;
+var KEY = 'barfoo!';
 
 var net = require('net');
 var encrypt = require('./encrypt.js');
@@ -61,38 +61,10 @@ var server = net.createServer(function (connection) { //'connection' listener
             return;
         }
         if (stage == 0) {
-            if (data.length != 3) {
-                connection.end();
-                return;
-            } else {
-                var tempBuf = new Buffer(2);
-                tempBuf.write('\x05\x00', 0);
-                encrypt.encrypt(encryptTable, tempBuf);
-                connection.write(tempBuf);
-                stage = 1;
-                return;
-            }
-        }
-        if (stage == 1) { // note this must be if, not else if!
             try {
-                // +----+-----+-------+------+----------+----------+
-                // |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
-                // +----+-----+-------+------+----------+----------+
-                // | 1  |  1  | X'00' |  1   | Variable |    2     |
-                // +----+-----+-------+------+----------+----------+
-
-                // cmd and addrtype
-                var cmd = data[1];
-                var addrtype = data[3];
-                if (cmd != 1) {
-                    console.warn('unsupported cmd: ' + cmd);
-                    var reply = new Buffer('\x05\x07\x00\x01', 'binary');
-                    encrypt.encrypt(encryptTable, reply);
-                    connection.end(reply);
-                    return;
-                }
+                var addrtype = data[0];
                 if (addrtype == 3) {
-                    addrLen = data[4];
+                    addrLen = data[1];
                 } else if (addrtype != 1) {
                     console.warn('unsupported addrtype: ' + addrtype);
                     connection.end();
@@ -100,28 +72,18 @@ var server = net.createServer(function (connection) { //'connection' listener
                 }
                 // read address and port
                 if (addrtype == 1) {
-                    remoteAddr = inetNtoa(data.slice(4, 8));
-                    remotePort = data.readUInt16BE(9);
-                    headerLength = 10;
+                    remoteAddr = inetNtoa(data.slice(1, 5));
+                    remotePort = data.readUInt16BE(6);
+                    headerLength = 7;
                 } else {
-                    remoteAddr = data.slice(5, 5 + addrLen).toString('binary');
-                    remotePort = data.readUInt16BE(5 + addrLen);
-                    headerLength = 5 + addrLen + 2;
+                    remoteAddr = data.slice(2, 2 + addrLen).toString('binary');
+                    remotePort = data.readUInt16BE(2 + addrLen);
+                    headerLength = 2 + addrLen + 2;
                 }
+                console.log(remoteAddr);
                 // connect remote server
                 remote = net.connect(remotePort, remoteAddr, function () {
                     console.log('connecting ' + remoteAddr);
-                    var ipBuf = inetAton(remote.remoteAddress);
-                    if (ipBuf == null) {
-                        connection.end();
-                        return;
-                    }
-                    var buf = new Buffer(10);
-                    buf.write('\x05\x00\x00\x01', 0, 4, 'binary');
-                    ipBuf.copy(buf, 4);
-                    buf.writeInt16BE(remote.remotePort, 8);
-                    encrypt.encrypt(encryptTable, buf);
-                    connection.write(buf);
                     for (var i = 0; i < cachedPieces.length; i++) {
                         var piece = cachedPieces[i];
                         remote.write(piece);
@@ -142,9 +104,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 remote.on('error', function () {
                     if (stage == 4) {
                         console.warn('remote connection refused');
-                        var reply = new Buffer('\x05\x05\x00\x01\x00\x00\x00\x00\x00\x00', 'binary');
-                        encrypt.encrypt(encryptTable, reply);
-                        connection.end(reply);
+                        connection.end();
                         return;
                     }
                     console.warn('remote error');
@@ -157,6 +117,8 @@ var server = net.createServer(function (connection) { //'connection' listener
                     // make sure no data is lost
                     var buf = new Buffer(data.length - headerLength);
                     data.copy(buf, 0, headerLength);
+//                    console.log('data/header: ' + data.length + '/' + headerLength);
+//                    console.log(buf.toString('binary'));
                     cachedPieces.push(buf);
                     buf = null;
                 }
@@ -167,7 +129,8 @@ var server = net.createServer(function (connection) { //'connection' listener
                 connection.end();
             }
         } else if (stage == 4) { // note this must be else if, not if!
-            console.log(4);
+//            console.log(4);
+//            console.log(data.toString('binary'));
             // remote server not connected
             // cache received buffers
             // make sure no data is lost
