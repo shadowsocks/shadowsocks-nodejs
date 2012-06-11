@@ -73,7 +73,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 // read address and port
                 if (addrtype == 1) {
                     remoteAddr = inetNtoa(data.slice(1, 5));
-                    remotePort = data.readUInt16BE(6);
+                    remotePort = data.readUInt16BE(5);
                     headerLength = 7;
                 } else {
                     remoteAddr = data.slice(2, 2 + addrLen).toString('binary');

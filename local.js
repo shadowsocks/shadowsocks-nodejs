@@ -101,7 +101,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 if (addrtype == 1) {
                     remoteAddr = inetNtoa(data.slice(4, 8));
                     addrToSend += data.slice(4, 10).toString('binary');
-                    remotePort = data.readUInt16BE(9);
+                    remotePort = data.readUInt16BE(8);
                     headerLength = 10;
                 } else {
                     remoteAddr = data.slice(5, 5 + addrLen).toString('binary');
