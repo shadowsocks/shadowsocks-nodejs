@@ -109,24 +109,20 @@ var server = net.createServer(function (connection) { //'connection' listener
                     remotePort = data.readUInt16BE(5 + addrLen);
                     headerLength = 5 + addrLen + 2;
                 }
+				var buf = new Buffer(10);
+				buf.write('\x05\x00\x00\x01', 0, 4, 'binary');
+				buf.write('\x00\x00\x00\x00', 4, 8, 'binary');
+				buf.writeInt16BE(remotePort, 8);
+				connection.write(buf);
                 // connect remote server
                 remote = net.connect(REMOTE_PORT, SERVER, function () {
                     console.log('connecting ' + remoteAddr);
-                    var ipBuf = inetAton(remote.remoteAddress);
-                    if (ipBuf == null) {
-                        connection.end();
-                        return;
-                    }
-                    var addrToSendBuf = new Buffer(addrToSend, 'binary');
+
+					var addrToSendBuf = new Buffer(addrToSend, 'binary');
 //                    console.log(addrToSend);
                     encrypt.encrypt(encryptTable, addrToSendBuf);
                     remote.write(addrToSendBuf);
-                    var buf = new Buffer(10);
-                    buf.write('\x05\x00\x00\x01', 0, 4, 'binary');
-                    ipBuf.copy(buf, 4);
-                    buf.writeInt16BE(remote.remotePort, 8);
 //                    encrypt.encrypt(encryptTable, buf);
-                    connection.write(buf);
                     for (var i = 0; i < cachedPieces.length; i++) {
                         var piece = cachedPieces[i];
                         encrypt.encrypt(encryptTable, piece);
@@ -192,7 +188,8 @@ var server = net.createServer(function (connection) { //'connection' listener
         }
     });
     connection.on('drain', function () {
-        if (remote) {
+		// calling resume() when remote not is connected will crash node.js
+        if (remote && stage == 5) {
             remote.resume();
         }
     });
