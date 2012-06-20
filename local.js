@@ -24,6 +24,7 @@ var SERVER = '127.0.0.1';
 var REMOTE_PORT = 8388;
 var PORT = 1080;
 var KEY = 'barfoo!';
+var timeout = 30000;
 
 var net = require('net');
 var encrypt = require('./encrypt.js');
@@ -50,6 +51,7 @@ function inetAton(ipStr) {
 
 var server = net.createServer(function (connection) { //'connection' listener
     console.log('server connected');
+    console.log('concurrent connections: ' + server.connections);
 
     var stage = 0, headerLength = 0, remote = null, cachedPieces = [],
         addrLen = 0, remoteAddr = null, remotePort = null, addrToSend = '';
@@ -109,16 +111,16 @@ var server = net.createServer(function (connection) { //'connection' listener
                     remotePort = data.readUInt16BE(5 + addrLen);
                     headerLength = 5 + addrLen + 2;
                 }
-				var buf = new Buffer(10);
-				buf.write('\x05\x00\x00\x01', 0, 4, 'binary');
-				buf.write('\x00\x00\x00\x00', 4, 8, 'binary');
-				buf.writeInt16BE(remotePort, 8);
-				connection.write(buf);
+                var buf = new Buffer(10);
+                buf.write('\x05\x00\x00\x01', 0, 4, 'binary');
+                buf.write('\x00\x00\x00\x00', 4, 4, 'binary');
+                buf.writeInt16BE(remotePort, 8);
+                connection.write(buf);
                 // connect remote server
                 remote = net.connect(REMOTE_PORT, SERVER, function () {
                     console.log('connecting ' + remoteAddr);
 
-					var addrToSendBuf = new Buffer(addrToSend, 'binary');
+                    var addrToSendBuf = new Buffer(addrToSend, 'binary');
 //                    console.log(addrToSend);
                     encrypt.encrypt(encryptTable, addrToSendBuf);
                     remote.write(addrToSendBuf);
@@ -140,6 +142,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 remote.on('end', function () {
                     console.log('remote disconnected');
                     connection.end();
+                    console.log('concurrent connections: ' + server.connections);
                 });
                 remote.on('error', function () {
                     if (stage == 4) {
@@ -151,9 +154,14 @@ var server = net.createServer(function (connection) { //'connection' listener
                     }
                     console.warn('remote error');
                     connection.end();
+                    console.log('concurrent connections: ' + server.connections);
                 });
                 remote.on('drain', function () {
                     connection.resume();
+                });
+                remote.setTimeout(timeout, function () {
+                    connection.end();
+                    remote.destroy();
                 });
                 if (data.length > headerLength) {
                     // make sure no data is lost
@@ -166,7 +174,10 @@ var server = net.createServer(function (connection) { //'connection' listener
             } catch (e) {
                 // may encouter index out of range
                 console.warn(e);
-                connection.end();
+                connection.destroy();
+                if (remote) {
+                    remote.destroy();
+                }
             }
         } else if (stage == 4) { // note this must be else if, not if!
             // remote server not connected
@@ -178,28 +189,36 @@ var server = net.createServer(function (connection) { //'connection' listener
     connection.on('end', function () {
         console.log('server disconnected');
         if (remote) {
-            remote.end();
+            remote.destroy();
         }
+        console.log('concurrent connections: ' + server.connections);
     });
     connection.on('error', function () {
         console.warn('server error');
         if (remote) {
-            remote.end();
+            remote.destroy();
         }
+        console.log('concurrent connections: ' + server.connections);
     });
     connection.on('drain', function () {
-		// calling resume() when remote not is connected will crash node.js
+        // calling resume() when remote not is connected will crash node.js
         if (remote && stage == 5) {
             remote.resume();
         }
     });
+    connection.setTimeout(timeout, function () {
+        if (remote) {
+            remote.destroy();
+        }
+        connection.destroy();
+    })
 });
 server.listen(PORT, function () {
     console.log('server listening at port ' + PORT);
 });
 server.on('error', function (e) {
-  if (e.code == 'EADDRINUSE') {
-    console.warn('Address in use, aborting');
-  }
+    if (e.code == 'EADDRINUSE') {
+        console.warn('Address in use, aborting');
+    }
 });
 

@@ -22,6 +22,7 @@
 
 var PORT = 8388;
 var KEY = 'barfoo!';
+var timeout = 30000;
 
 var net = require('net');
 var encrypt = require('./encrypt.js');
@@ -48,6 +49,7 @@ function inetAton(ipStr) {
 
 var server = net.createServer(function (connection) { //'connection' listener
     console.log('server connected');
+    console.log('concurrent connections: ' + server.connections);
 
     var stage = 0, headerLength = 0, remote = null, cachedPieces = [],
         addrLen = 0, remoteAddr = null, remotePort = null;
@@ -99,6 +101,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 });
                 remote.on('end', function () {
                     console.log('remote disconnected');
+                    console.log('concurrent connections: ' + server.connections);
                     connection.end();
                 });
                 remote.on('error', function () {
@@ -109,9 +112,14 @@ var server = net.createServer(function (connection) { //'connection' listener
                     }
                     console.warn('remote error');
                     connection.end();
+                    console.log('concurrent connections: ' + server.connections);
                 });
                 remote.on('drain', function () {
                     connection.resume();
+                });
+                remote.setTimeout(timeout, function() {
+                    connection.end();
+                    remote.destroy();
                 });
                 if (data.length > headerLength) {
                     // make sure no data is lost
@@ -126,7 +134,10 @@ var server = net.createServer(function (connection) { //'connection' listener
             } catch (e) {
                 // may encouter index out of range
                 console.warn(e);
-                connection.end();
+                connection.destroy();
+                if (remote) {
+                    remote.destroy();
+                }
             }
         } else if (stage == 4) { // note this must be else if, not if!
 //            console.log(4);
@@ -140,20 +151,28 @@ var server = net.createServer(function (connection) { //'connection' listener
     connection.on('end', function () {
         console.log('server disconnected');
         if (remote) {
-            remote.end();
+            remote.destroy();
         }
+        console.log('concurrent connections: ' + server.connections);
     });
     connection.on('error', function () {
         console.warn('server error');
         if (remote) {
-            remote.end();
+            remote.destroy();
         }
+        console.log('concurrent connections: ' + server.connections);
     });
     connection.on('drain', function () {
         if (remote) {
             remote.resume();
         }
     });
+    connection.setTimeout(timeout, function() {
+        if (remote) {
+            remote.destroy();
+        }
+        connection.destroy();
+    })
 });
 server.listen(PORT, function () {
     console.log('server listening at port ' + PORT);
@@ -163,4 +182,6 @@ server.on('error', function (e) {
     console.warn('Address in use, aborting');
   }
 });
+
+console.log(server.maxConnections);
 
