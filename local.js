@@ -147,9 +147,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 remote.on('error', function () {
                     if (stage == 4) {
                         console.warn('remote connection refused');
-                        var reply = new Buffer('\x05\x05\x00\x01\x00\x00\x00\x00\x00\x00', 'binary');
-//                        encrypt.encrypt(encryptTable, reply);
-                        connection.end(reply);
+                        connection.destroy();
                         return;
                     }
                     console.warn('remote error');
