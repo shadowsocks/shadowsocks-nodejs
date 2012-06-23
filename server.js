@@ -117,7 +117,7 @@ var server = net.createServer(function (connection) { //'connection' listener
                 remote.on('drain', function () {
                     connection.resume();
                 });
-                remote.setTimeout(timeout, function() {
+                remote.setTimeout(timeout, function () {
                     connection.end();
                     remote.destroy();
                 });
@@ -167,7 +167,7 @@ var server = net.createServer(function (connection) { //'connection' listener
             remote.resume();
         }
     });
-    connection.setTimeout(timeout, function() {
+    connection.setTimeout(timeout, function () {
         if (remote) {
             remote.destroy();
         }
@@ -178,9 +178,9 @@ server.listen(PORT, function () {
     console.log('server listening at port ' + PORT);
 });
 server.on('error', function (e) {
-  if (e.code == 'EADDRINUSE') {
-    console.warn('Address in use, aborting');
-  }
+    if (e.code == 'EADDRINUSE') {
+        console.warn('Address in use, aborting');
+    }
 });
 
 console.log(server.maxConnections);
