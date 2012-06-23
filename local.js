@@ -20,7 +20,10 @@
  SOFTWARE.
  */
 
-var SERVER = '127.0.0.1';
+var SERVERS = [
+    'my_server_0',
+    'my_server_1'
+];
 var REMOTE_PORT = 8388;
 var PORT = 1080;
 var KEY = 'barfoo!';
@@ -117,8 +120,9 @@ var server = net.createServer(function (connection) { //'connection' listener
                 buf.writeInt16BE(remotePort, 8);
                 connection.write(buf);
                 // connect remote server
-                remote = net.connect(REMOTE_PORT, SERVER, function () {
-                    console.log('connecting ' + remoteAddr);
+                var currentServer = SERVERS[Math.floor(Math.random() * SERVERS.length)];
+                remote = net.connect(REMOTE_PORT, currentServer, function () {
+                    console.log('connecting ' + remoteAddr + ' via ' + currentServer);
 
                     var addrToSendBuf = new Buffer(addrToSend, 'binary');
 //                    console.log(addrToSend);
