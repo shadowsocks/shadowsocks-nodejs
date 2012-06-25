@@ -24,7 +24,7 @@ var SERVER = '127.0.0.1';
 var REMOTE_PORT = 8388;
 var PORT = 1080;
 var KEY = 'barfoo!';
-var timeout = 30000;
+var timeout = 60000;
 
 var net = require('net');
 var encrypt = require('./encrypt.js');

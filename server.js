@@ -22,7 +22,7 @@
 
 var PORT = 8388;
 var KEY = 'barfoo!';
-var timeout = 30000;
+var timeout = 60000;
 
 var net = require('net');
 var encrypt = require('./encrypt.js');
