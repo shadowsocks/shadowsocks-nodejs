@@ -42,6 +42,12 @@ PORT = config.local_port
 KEY = config.password
 timeout = Math.floor(config.timeout * 1000)
 
+getServer = ->
+  if SERVER instanceof Array
+    SERVER[Math.floor(Math.random() * SERVER.length)]
+  else
+    SERVER
+
 net = require("net")
 encrypt = require("./encrypt")
 console.log "calculating ciphers"
@@ -112,8 +118,9 @@ server = net.createServer((connection) ->
         buf.writeInt16BE remotePort, 8
         connection.write buf
         # connect remote server
-        remote = net.connect(REMOTE_PORT, SERVER, ->
-          console.log "connecting " + remoteAddr
+        aServer = getServer()
+        remote = net.connect(REMOTE_PORT, aServer, ->
+          console.log "connecting #{remoteAddr} via #{aServer}"
           addrToSendBuf = new Buffer(addrToSend, "binary")
           encrypt.encrypt encryptTable, addrToSendBuf
           remote.write addrToSendBuf
