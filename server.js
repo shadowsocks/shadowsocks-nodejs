@@ -20,9 +20,12 @@
  SOFTWARE.
  */
 
-var PORT = 8388;
-var KEY = 'barfoo!';
-var timeout = 60000;
+var fs = require('fs');
+var configContent = fs.readFileSync('config.json');
+var config = JSON.parse(configContent);
+var PORT = config.server_port;
+var KEY = config.password;
+var timeout = Math.floor(config.timeout * 1000);
 
 var net = require('net');
 var encrypt = require('./encrypt.js');

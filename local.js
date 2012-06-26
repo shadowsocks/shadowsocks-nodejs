@@ -20,11 +20,14 @@
  SOFTWARE.
  */
 
-var SERVER = '127.0.0.1';
-var REMOTE_PORT = 8388;
-var PORT = 1080;
-var KEY = 'barfoo!';
-var timeout = 60000;
+var fs = require('fs');
+var configContent = fs.readFileSync('config.json');
+var config = JSON.parse(configContent);
+var SERVER = config.server;
+var REMOTE_PORT = config.server_port;
+var PORT = config.local_port;
+var KEY = config.password;
+var timeout = Math.floor(config.timeout * 1000);
 
 var net = require('net');
 var encrypt = require('./encrypt.js');
