@@ -12,23 +12,20 @@ The protocol is compatible with the origin shadowsocks(if both have been upgrade
 usage
 -----------
 
-Put all the files on your server. Edit `server.js`, change the following values:
+Edit `config.json`, change the following values:
 
-    PORT          server port
-    KEY           a password to identify clients
+    server          your server ip or hostname
+    server_port     server port
+    local_port      local port
+    password        a password used to encrypt transfer
+    timeout         in seconds
 
-Run `node server.js` on your server. To run it in the background, run `setsid node server.js`.
+Put all the files on your server.  Run `node server.js` on your server. To run it in the background, run
+`setsid node server.js`.
 
-Put all the files on your client machine. Edit `local.js`, change these values:
-
-    SERVER        your server ip or hostname
-    REMOTE_PORT   server port
-    PORT          local port
-    KEY           a password, it must be the same as the password of your server
-
-Run `node local.js` on your client machine.
+Put all the files on your client machine. Run `node local.js` on your client machine.
 
 Change proxy settings of your browser into
 
-    SOCKS5 127.0.0.1:PORT
+    SOCKS5 127.0.0.1:local_port
 
