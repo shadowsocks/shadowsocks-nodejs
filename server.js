@@ -149,7 +149,7 @@
     connection.on("end", function() {
       console.log("server disconnected");
       if (remote) {
-        remote.destroy();
+        remote.end();
       }
       return console.log("concurrent connections: " + server.connections);
     });

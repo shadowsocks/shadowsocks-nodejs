@@ -34,6 +34,7 @@ inetAton = (ipStr) ->
     buf
 
 fs = require("fs")
+scheduler = require('./scheduler')
 configContent = fs.readFileSync("config.json")
 config = JSON.parse(configContent)
 SERVER = config.server
@@ -42,11 +43,9 @@ PORT = config.local_port
 KEY = config.password
 timeout = Math.floor(config.timeout * 1000)
 
+myScheduler = new scheduler.Scheduler SERVER
 getServer = ->
-  if SERVER instanceof Array
-    SERVER[Math.floor(Math.random() * SERVER.length)]
-  else
-    SERVER
+  myScheduler.getServer()
 
 net = require("net")
 encrypt = require("./encrypt")
@@ -56,7 +55,7 @@ encryptTable = tables[0]
 decryptTable = tables[1]
 
 server = net.createServer((connection) ->
-  console.log "server connected"
+  console.log "local connected"
   console.log "concurrent connections: " + server.connections
   stage = 0
   headerLength = 0
@@ -66,6 +65,7 @@ server = net.createServer((connection) ->
   remoteAddr = null
   remotePort = null
   addrToSend = ""
+  serverUsing = getServer()
   connection.on "data", (data) ->
     if stage is 5
       # pipe sockets
@@ -118,9 +118,8 @@ server = net.createServer((connection) ->
         buf.writeInt16BE remotePort, 8
         connection.write buf
         # connect remote server
-        aServer = getServer()
-        remote = net.connect(REMOTE_PORT, aServer, ->
-          console.log "connecting #{remoteAddr} via #{aServer}"
+        remote = net.connect(REMOTE_PORT, serverUsing, ->
+          console.log "connecting #{remoteAddr} via #{serverUsing}"
           addrToSendBuf = new Buffer(addrToSend, "binary")
           encrypt.encrypt encryptTable, addrToSendBuf
           remote.write addrToSendBuf
@@ -144,12 +143,13 @@ server = net.createServer((connection) ->
           console.log "concurrent connections: " + server.connections
 
         remote.on "error", ->
+          myScheduler.serverFailed(serverUsing)
           if stage is 4
             console.warn "remote connection refused"
             connection.destroy()
-            return
-          console.warn "remote error"
-          connection.end()
+          else
+            console.warn "remote error"
+            connection.end()
           console.log "concurrent connections: " + server.connections
 
         remote.on "drain", ->
@@ -176,12 +176,13 @@ server = net.createServer((connection) ->
       # make sure no data is lost
 
   connection.on "end", ->
-    console.log "server disconnected"
-    remote.destroy()  if remote
+    myScheduler.serverSucceeded(serverUsing)
+    console.log "local disconnected"
+    remote.end()  if remote
     console.log "concurrent connections: " + server.connections
 
   connection.on "error", ->
-    console.warn "server error"
+    console.warn "local error"
     remote.destroy()  if remote
     console.log "concurrent connections: " + server.connections
 

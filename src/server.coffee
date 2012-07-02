@@ -136,7 +136,7 @@ server = net.createServer((connection) ->
 
   connection.on "end", ->
     console.log "server disconnected"
-    remote.destroy()  if remote
+    remote.end()  if remote
     console.log "concurrent connections: " + server.connections
 
   connection.on "error", ->
