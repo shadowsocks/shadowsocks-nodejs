@@ -34,7 +34,8 @@ inetAton = (ipStr) ->
     buf
 
 fs = require("fs")
-configContent = fs.readFileSync("config.json")
+path = require("path")
+configContent = fs.readFileSync(path.resolve(__dirname, "config.json"))
 config = JSON.parse(configContent)
 SERVER = config.server
 REMOTE_PORT = config.server_port
