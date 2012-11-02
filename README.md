@@ -21,7 +21,7 @@ Edit `config.json`, change the following values:
     timeout         in seconds
 
 Put all the files on your server.  Run `node server.js` on your server. To run it in the background, run
-`setsid node server.js`.
+`nohup node server.js > log &`.
 
 Put all the files on your client machine. Run `node local.js` on your client machine.
 
