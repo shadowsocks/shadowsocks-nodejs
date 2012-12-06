@@ -36,6 +36,9 @@ inetAton = (ipStr) ->
 fs = require("fs")
 configContent = fs.readFileSync("config.json")
 config = JSON.parse(configContent)
+configFromArgs = require('./args').parseArgs()
+for k, v of configFromArgs
+  config[k] = v
 SERVER = config.server
 REMOTE_PORT = config.server_port
 PORT = config.local_port
