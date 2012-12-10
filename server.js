@@ -190,6 +190,4 @@
     }
   });
 
-  console.log(server.maxConnections);
-
 }).call(this);

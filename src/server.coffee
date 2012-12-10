@@ -159,5 +159,3 @@ server.listen PORT, ->
 
 server.on "error", (e) ->
   console.warn "Address in use, aborting"  if e.code is "EADDRINUSE"
-
-console.log server.maxConnections
