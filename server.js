@@ -72,8 +72,6 @@
     decryptTable = tables[1];
     server = net.createServer(function(connection) {
       var addrLen, cachedPieces, headerLength, remote, remoteAddr, remotePort, stage;
-      util.log("server connected");
-      util.log("concurrent connections: " + server.connections);
       stage = 0;
       headerLength = 0;
       remote = null;
@@ -109,10 +107,9 @@
               remotePort = data.readUInt16BE(2 + addrLen);
               headerLength = 2 + addrLen + 2;
             }
-            util.log(remoteAddr);
             remote = net.connect(remotePort, remoteAddr, function() {
               var i, piece;
-              util.log("connecting " + remoteAddr);
+              util.log("connecting " + remoteAddr + ":" + remotePort);
               i = 0;
               while (i < cachedPieces.length) {
                 piece = cachedPieces[i];
@@ -129,19 +126,11 @@
               }
             });
             remote.on("end", function() {
-              util.log("remote disconnected");
-              util.log("concurrent connections: " + server.connections);
               return connection.end();
             });
-            remote.on("error", function() {
-              if (stage === 4) {
-                util.warn("remote connection refused");
-                connection.end();
-                return;
-              }
-              util.log("remote error");
-              connection.end();
-              return util.log("concurrent connections: " + server.connections);
+            remote.on("error", function(e) {
+              util.log("remote " + remoteAddr + ":" + remotePort + " error: " + e);
+              return connection.destroy();
             });
             remote.on("drain", function() {
               return connection.resume();
@@ -171,18 +160,15 @@
         }
       });
       connection.on("end", function() {
-        util.log("server disconnected");
         if (remote) {
-          remote.destroy();
+          return remote.destroy();
         }
-        return util.log("concurrent connections: " + server.connections);
       });
-      connection.on("error", function() {
-        util.log("server error");
+      connection.on("error", function(e) {
+        util.log("local error: " + e);
         if (remote) {
-          remote.destroy();
+          return remote.destroy();
         }
-        return util.log("concurrent connections: " + server.connections);
       });
       connection.on("drain", function() {
         if (remote) {

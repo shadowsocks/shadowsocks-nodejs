@@ -71,8 +71,6 @@
 
   server = net.createServer(function(connection) {
     var addrLen, addrToSend, cachedPieces, headerLength, remote, remoteAddr, remotePort, stage;
-    util.log("server connected");
-    util.log("concurrent connections: " + server.connections);
     stage = 0;
     headerLength = 0;
     remote = null;
@@ -129,12 +127,12 @@
           buf = new Buffer(10);
           buf.write("\u0005\u0000\u0000\u0001", 0, 4, "binary");
           buf.write("\u0000\u0000\u0000\u0000", 4, 4, "binary");
-          buf.writeInt16BE(remotePort, 8);
+          buf.writeInt16BE(2222, 8);
           connection.write(buf);
           aServer = getServer();
           remote = net.connect(REMOTE_PORT, aServer, function() {
             var addrToSendBuf, i, piece;
-            util.log("connecting " + remoteAddr + " via " + aServer);
+            util.log("connecting " + remoteAddr + ":" + remotePort);
             addrToSendBuf = new Buffer(addrToSend, "binary");
             encrypt.encrypt(encryptTable, addrToSendBuf);
             remote.write(addrToSendBuf);
@@ -155,19 +153,15 @@
             }
           });
           remote.on("end", function() {
-            util.log("remote disconnected");
-            connection.end();
-            return util.log("concurrent connections: " + server.connections);
+            return connection.end();
           });
-          remote.on("error", function() {
+          remote.on("error", function(e) {
+            util.log("remote " + remoteAddr + ":" + remotePort + " error: " + e);
             if (stage === 4) {
-              util.log("remote connection refused");
               connection.destroy();
               return;
             }
-            util.log("remote error");
-            connection.end();
-            return util.log("concurrent connections: " + server.connections);
+            return connection.end();
           });
           remote.on("drain", function() {
             return connection.resume();
@@ -197,18 +191,15 @@
       }
     });
     connection.on("end", function() {
-      util.log("server disconnected");
       if (remote) {
-        remote.destroy();
+        return remote.destroy();
       }
-      return util.log("concurrent connections: " + server.connections);
     });
-    connection.on("error", function() {
-      util.warn("server error");
+    connection.on("error", function(e) {
+      util.log("local error: " + e);
       if (remote) {
-        remote.destroy();
+        return remote.destroy();
       }
-      return util.log("concurrent connections: " + server.connections);
     });
     connection.on("drain", function() {
       if (remote && stage === 5) {

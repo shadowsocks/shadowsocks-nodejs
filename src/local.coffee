@@ -63,8 +63,6 @@ encryptTable = tables[0]
 decryptTable = tables[1]
 
 server = net.createServer((connection) ->
-  util.log "server connected"
-  util.log "concurrent connections: " + server.connections
   stage = 0
   headerLength = 0
   remote = null
@@ -122,12 +120,13 @@ server = net.createServer((connection) ->
         buf = new Buffer(10)
         buf.write "\u0005\u0000\u0000\u0001", 0, 4, "binary"
         buf.write "\u0000\u0000\u0000\u0000", 4, 4, "binary"
-        buf.writeInt16BE remotePort, 8
+        # 2222 can be any number between 1 and 65535
+        buf.writeInt16BE 2222, 8
         connection.write buf
         # connect remote server
         aServer = getServer()
         remote = net.connect(REMOTE_PORT, aServer, ->
-          util.log "connecting #{remoteAddr} via #{aServer}"
+          util.log "connecting #{remoteAddr}:#{remotePort}"
           addrToSendBuf = new Buffer(addrToSend, "binary")
           encrypt.encrypt encryptTable, addrToSendBuf
           remote.write addrToSendBuf
@@ -146,18 +145,14 @@ server = net.createServer((connection) ->
           remote.pause()  unless connection.write(data)
 
         remote.on "end", ->
-          util.log "remote disconnected"
           connection.end()
-          util.log "concurrent connections: " + server.connections
 
-        remote.on "error", ->
+        remote.on "error", (e)->
+          util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
           if stage is 4
-            util.log "remote connection refused"
             connection.destroy()
             return
-          util.log "remote error"
           connection.end()
-          util.log "concurrent connections: " + server.connections
 
         remote.on "drain", ->
           connection.resume()
@@ -183,14 +178,11 @@ server = net.createServer((connection) ->
       # make sure no data is lost
 
   connection.on "end", ->
-    util.log "server disconnected"
     remote.destroy()  if remote
-    util.log "concurrent connections: " + server.connections
 
-  connection.on "error", ->
-    util.warn "server error"
+  connection.on "error", (e)->
+    util.log "local error: #{e}"
     remote.destroy()  if remote
-    util.log "concurrent connections: " + server.connections
 
   connection.on "drain", ->
     # calling resume() when remote not is connected will crash node.js

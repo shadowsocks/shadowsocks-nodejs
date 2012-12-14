@@ -69,8 +69,6 @@ for port, key of portPassword
     decryptTable = tables[1]
     
     server = net.createServer((connection) ->
-      util.log "server connected"
-      util.log "concurrent connections: " + server.connections
       stage = 0
       headerLength = 0
       remote = null
@@ -101,10 +99,9 @@ for port, key of portPassword
               remoteAddr = data.slice(2, 2 + addrLen).toString("binary")
               remotePort = data.readUInt16BE(2 + addrLen)
               headerLength = 2 + addrLen + 2
-            util.log remoteAddr
             # connect remote server
             remote = net.connect(remotePort, remoteAddr, ->
-              util.log "connecting " + remoteAddr
+              util.log "connecting #{remoteAddr}:#{remotePort}"
               i = 0
     
               while i < cachedPieces.length
@@ -119,18 +116,11 @@ for port, key of portPassword
               remote.pause()  unless connection.write(data)
     
             remote.on "end", ->
-              util.log "remote disconnected"
-              util.log "concurrent connections: " + server.connections
               connection.end()
     
-            remote.on "error", ->
-              if stage is 4
-                util.warn "remote connection refused"
-                connection.end()
-                return
-              util.log "remote error"
-              connection.end()
-              util.log "concurrent connections: " + server.connections
+            remote.on "error", (e)->
+              util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
+              connection.destroy()
     
             remote.on "drain", ->
               connection.resume()
@@ -157,14 +147,11 @@ for port, key of portPassword
           # make sure no data is lost
     
       connection.on "end", ->
-        util.log "server disconnected"
         remote.destroy()  if remote
-        util.log "concurrent connections: " + server.connections
     
-      connection.on "error", ->
-        util.log "server error"
+      connection.on "error", (e)->
+        util.log "local error: #{e}"
         remote.destroy()  if remote
-        util.log "concurrent connections: " + server.connections
     
       connection.on "drain", ->
         remote.resume()  if remote
