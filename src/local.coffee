@@ -23,7 +23,7 @@ net = require("net")
 fs = require("fs")
 path = require("path")
 util = require('util')
-encrypt = require("./encrypt")
+Encryptor = require("./encrypt").Encryptor
 
 inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
@@ -58,9 +58,7 @@ getServer = ->
     SERVER
 
 util.log "calculating ciphers"
-tables = encrypt.getTable(KEY)
-encryptTable = tables[0]
-decryptTable = tables[1]
+encryptor = new Encryptor(KEY, null)
 
 server = net.createServer((connection) ->
   stage = 0
@@ -74,7 +72,7 @@ server = net.createServer((connection) ->
   connection.on "data", (data) ->
     if stage is 5
       # pipe sockets
-      encrypt.encrypt encryptTable, data
+      encryptor.encrypt data
       connection.pause()  unless remote.write(data)
       return
     if stage is 0
@@ -128,20 +126,20 @@ server = net.createServer((connection) ->
         remote = net.connect(REMOTE_PORT, aServer, ->
           util.log "connecting #{remoteAddr}:#{remotePort}"
           addrToSendBuf = new Buffer(addrToSend, "binary")
-          encrypt.encrypt encryptTable, addrToSendBuf
+          encryptor.encrypt addrToSendBuf
           remote.write addrToSendBuf
           i = 0
 
           while i < cachedPieces.length
             piece = cachedPieces[i]
-            encrypt.encrypt encryptTable, piece
+            encryptor.encrypt piece
             remote.write piece
             i++
           cachedPieces = null # save memory
           stage = 5
         )
         remote.on "data", (data) ->
-          encrypt.encrypt decryptTable, data
+          encryptor.decrypt data
           remote.pause()  unless connection.write(data)
 
         remote.on "end", ->

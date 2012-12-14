@@ -22,7 +22,8 @@ net = require("net")
 fs = require("fs")
 path = require("path")
 util = require('util')
-encrypt = require("./encrypt")
+Encryptor = require("./encrypt").Encryptor
+
 
 inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
@@ -64,9 +65,7 @@ for port, key of portPassword
     PORT = port
     KEY = key
     util.log "calculating ciphers for port #{PORT}"
-    tables = encrypt.getTable(KEY)
-    encryptTable = tables[0]
-    decryptTable = tables[1]
+    encryptor = new Encryptor(KEY, null)
     
     server = net.createServer((connection) ->
       stage = 0
@@ -77,7 +76,7 @@ for port, key of portPassword
       remoteAddr = null
       remotePort = null
       connection.on "data", (data) ->
-        encrypt.encrypt decryptTable, data
+        encryptor.decrypt data
         if stage is 5
           connection.pause()  unless remote.write(data)
           return
@@ -112,7 +111,7 @@ for port, key of portPassword
               stage = 5
             )
             remote.on "data", (data) ->
-              encrypt.encrypt encryptTable, data
+              encryptor.encrypt data
               remote.pause()  unless connection.write(data)
     
             remote.on "end", ->
