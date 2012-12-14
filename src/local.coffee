@@ -18,6 +18,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+net = require("net")
+fs = require("fs")
+path = require("path")
+util = require('util')
+encrypt = require("./encrypt")
+
 inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
 inetAton = (ipStr) ->
@@ -33,8 +40,6 @@ inetAton = (ipStr) ->
       i++
     buf
 
-fs = require("fs")
-path = require("path")
 configContent = fs.readFileSync(path.resolve(__dirname, "config.json"))
 config = JSON.parse(configContent)
 configFromArgs = require('./args').parseArgs()
@@ -52,16 +57,14 @@ getServer = ->
   else
     SERVER
 
-net = require("net")
-encrypt = require("./encrypt")
-console.log "calculating ciphers"
+util.log "calculating ciphers"
 tables = encrypt.getTable(KEY)
 encryptTable = tables[0]
 decryptTable = tables[1]
 
 server = net.createServer((connection) ->
-  console.log "server connected"
-  console.log "concurrent connections: " + server.connections
+  util.log "server connected"
+  util.log "concurrent connections: " + server.connections
   stage = 0
   headerLength = 0
   remote = null
@@ -94,14 +97,14 @@ server = net.createServer((connection) ->
         cmd = data[1]
         addrtype = data[3]
         unless cmd is 1
-          console.warn "unsupported cmd: " + cmd
+          util.log "unsupported cmd: " + cmd
           reply = new Buffer("\u0005\u0007\u0000\u0001", "binary")
           connection.end reply
           return
         if addrtype is 3
           addrLen = data[4]
         else unless addrtype is 1
-          console.warn "unsupported addrtype: " + addrtype
+          util.log "unsupported addrtype: " + addrtype
           connection.end()
           return
         addrToSend = data.slice(3, 4).toString("binary")
@@ -124,7 +127,7 @@ server = net.createServer((connection) ->
         # connect remote server
         aServer = getServer()
         remote = net.connect(REMOTE_PORT, aServer, ->
-          console.log "connecting #{remoteAddr} via #{aServer}"
+          util.log "connecting #{remoteAddr} via #{aServer}"
           addrToSendBuf = new Buffer(addrToSend, "binary")
           encrypt.encrypt encryptTable, addrToSendBuf
           remote.write addrToSendBuf
@@ -143,18 +146,18 @@ server = net.createServer((connection) ->
           remote.pause()  unless connection.write(data)
 
         remote.on "end", ->
-          console.log "remote disconnected"
+          util.log "remote disconnected"
           connection.end()
-          console.log "concurrent connections: " + server.connections
+          util.log "concurrent connections: " + server.connections
 
         remote.on "error", ->
           if stage is 4
-            console.warn "remote connection refused"
+            util.log "remote connection refused"
             connection.destroy()
             return
-          console.warn "remote error"
+          util.log "remote error"
           connection.end()
-          console.log "concurrent connections: " + server.connections
+          util.log "concurrent connections: " + server.connections
 
         remote.on "drain", ->
           connection.resume()
@@ -171,7 +174,7 @@ server = net.createServer((connection) ->
         stage = 4
       catch e
         # may encounter index out of range
-        console.warn e
+        util.log e
         connection.destroy()
         remote.destroy()  if remote
     else cachedPieces.push data  if stage is 4
@@ -180,14 +183,14 @@ server = net.createServer((connection) ->
       # make sure no data is lost
 
   connection.on "end", ->
-    console.log "server disconnected"
+    util.log "server disconnected"
     remote.destroy()  if remote
-    console.log "concurrent connections: " + server.connections
+    util.log "concurrent connections: " + server.connections
 
   connection.on "error", ->
-    console.warn "server error"
+    util.warn "server error"
     remote.destroy()  if remote
-    console.log "concurrent connections: " + server.connections
+    util.log "concurrent connections: " + server.connections
 
   connection.on "drain", ->
     # calling resume() when remote not is connected will crash node.js
@@ -198,7 +201,7 @@ server = net.createServer((connection) ->
     connection.destroy()
 )
 server.listen PORT, ->
-  console.log "server listening at port " + PORT
+  util.log "server listening at port " + PORT
 
 server.on "error", (e) ->
-  console.warn "Address in use, aborting"  if e.code is "EADDRINUSE"
+  util.log "Address in use, aborting"  if e.code is "EADDRINUSE"

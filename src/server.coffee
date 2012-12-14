@@ -21,6 +21,7 @@
 net = require("net")
 fs = require("fs")
 path = require("path")
+util = require('util')
 encrypt = require("./encrypt")
 
 inetNtoa = (buf) ->
@@ -51,7 +52,7 @@ key = config.password
 
 if portPassword 
   if port or key
-    console.error 'warning: port_password should not be used with server_port and password. server_port and password will be ignored'
+    util.log 'warning: port_password should not be used with server_port and password. server_port and password will be ignored'
 else
   portPassword = {}
   portPassword[port.toString()] = key
@@ -62,14 +63,14 @@ for port, key of portPassword
     # let's use enclosures to seperate scopes of different servers
     PORT = port
     KEY = key
-    console.log "calculating ciphers for port #{PORT}"
+    util.log "calculating ciphers for port #{PORT}"
     tables = encrypt.getTable(KEY)
     encryptTable = tables[0]
     decryptTable = tables[1]
     
     server = net.createServer((connection) ->
-      console.log "server connected"
-      console.log "concurrent connections: " + server.connections
+      util.log "server connected"
+      util.log "concurrent connections: " + server.connections
       stage = 0
       headerLength = 0
       remote = null
@@ -88,7 +89,7 @@ for port, key of portPassword
             if addrtype is 3
               addrLen = data[1]
             else unless addrtype is 1
-              console.warn "unsupported addrtype: " + addrtype
+              util.log "unsupported addrtype: " + addrtype
               connection.end()
               return
             # read address and port
@@ -100,10 +101,10 @@ for port, key of portPassword
               remoteAddr = data.slice(2, 2 + addrLen).toString("binary")
               remotePort = data.readUInt16BE(2 + addrLen)
               headerLength = 2 + addrLen + 2
-            console.log remoteAddr
+            util.log remoteAddr
             # connect remote server
             remote = net.connect(remotePort, remoteAddr, ->
-              console.log "connecting " + remoteAddr
+              util.log "connecting " + remoteAddr
               i = 0
     
               while i < cachedPieces.length
@@ -118,18 +119,18 @@ for port, key of portPassword
               remote.pause()  unless connection.write(data)
     
             remote.on "end", ->
-              console.log "remote disconnected"
-              console.log "concurrent connections: " + server.connections
+              util.log "remote disconnected"
+              util.log "concurrent connections: " + server.connections
               connection.end()
     
             remote.on "error", ->
               if stage is 4
-                console.warn "remote connection refused"
+                util.warn "remote connection refused"
                 connection.end()
                 return
-              console.warn "remote error"
+              util.log "remote error"
               connection.end()
-              console.log "concurrent connections: " + server.connections
+              util.log "concurrent connections: " + server.connections
     
             remote.on "drain", ->
               connection.resume()
@@ -147,7 +148,7 @@ for port, key of portPassword
             stage = 4
           catch e
             # may encouter index out of range
-            console.warn e
+            util.log e
             connection.destroy()
             remote.destroy()  if remote
         else cachedPieces.push data  if stage is 4
@@ -156,14 +157,14 @@ for port, key of portPassword
           # make sure no data is lost
     
       connection.on "end", ->
-        console.log "server disconnected"
+        util.log "server disconnected"
         remote.destroy()  if remote
-        console.log "concurrent connections: " + server.connections
+        util.log "concurrent connections: " + server.connections
     
       connection.on "error", ->
-        console.warn "server error"
+        util.log "server error"
         remote.destroy()  if remote
-        console.log "concurrent connections: " + server.connections
+        util.log "concurrent connections: " + server.connections
     
       connection.on "drain", ->
         remote.resume()  if remote
@@ -173,9 +174,9 @@ for port, key of portPassword
         connection.destroy()
     )
     server.listen PORT, ->
-      console.log "server listening at port " + PORT
+      util.log "server listening at port " + PORT
     
     server.on "error", (e) ->
-      console.warn "Address in use, aborting"  if e.code is "EADDRINUSE"
+      util.warn "Address in use, aborting"  if e.code is "EADDRINUSE"
   )()
 
