@@ -49,6 +49,7 @@ SERVER = config.server
 REMOTE_PORT = config.server_port
 PORT = config.local_port
 KEY = config.password
+METHOD = config.method
 timeout = Math.floor(config.timeout * 1000)
 
 getServer = ->
@@ -58,7 +59,7 @@ getServer = ->
     SERVER
 
 util.log "calculating ciphers"
-encryptor = new Encryptor(KEY, null)
+encryptor = new Encryptor(KEY, METHOD)
 
 server = net.createServer((connection) ->
   stage = 0
@@ -72,7 +73,7 @@ server = net.createServer((connection) ->
   connection.on "data", (data) ->
     if stage is 5
       # pipe sockets
-      encryptor.encrypt data
+      data = encryptor.encrypt data
       connection.pause()  unless remote.write(data)
       return
     if stage is 0
@@ -126,20 +127,20 @@ server = net.createServer((connection) ->
         remote = net.connect(REMOTE_PORT, aServer, ->
           util.log "connecting #{remoteAddr}:#{remotePort}"
           addrToSendBuf = new Buffer(addrToSend, "binary")
-          encryptor.encrypt addrToSendBuf
+          addrToSendBuf = encryptor.encrypt addrToSendBuf
           remote.write addrToSendBuf
           i = 0
 
           while i < cachedPieces.length
             piece = cachedPieces[i]
-            encryptor.encrypt piece
+            piece = encryptor.encrypt piece
             remote.write piece
             i++
           cachedPieces = null # save memory
           stage = 5
         )
         remote.on "data", (data) ->
-          encryptor.decrypt data
+          data = encryptor.decrypt data
           remote.pause()  unless connection.write(data)
 
         remote.on "end", ->

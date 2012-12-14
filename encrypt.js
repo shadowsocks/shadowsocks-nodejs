@@ -61,18 +61,33 @@
       this.method = method;
       if (this.method === null) {
         _ref = getTable(key), this.encryptTable = _ref[0], this.decryptTable = _ref[1];
+      } else {
+        this.cipher = crypto.createCipher(this.method, key);
+        this.decipher = crypto.createDecipher(this.method, key);
       }
     }
 
     Encryptor.prototype.encrypt = function(buf) {
+      var result;
       if (this.method === null) {
         return encrypt(this.encryptTable, buf);
+      } else {
+        console.log(buf);
+        result = new Buffer(this.cipher.update(buf.toString('binary')));
+        console.log(result);
+        return result;
       }
     };
 
     Encryptor.prototype.decrypt = function(buf) {
+      var result;
       if (this.method === null) {
         return encrypt(this.decryptTable, buf);
+      } else {
+        console.log(buf);
+        result = new Buffer(this.decipher.update(buf.toString('binary')));
+        console.log(result);
+        return result;
       }
     };
 

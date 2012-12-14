@@ -67,13 +67,26 @@ class Encryptor
   constructor: (key, @method) ->
     if @method == null
       [@encryptTable, @decryptTable] = getTable(key)
+    else
+      @cipher = crypto.createCipher @method, key
+      @decipher = crypto.createDecipher @method, key
       
   encrypt: (buf) ->
     if @method == null
       encrypt @encryptTable, buf
+    else
+      console.log buf
+      result = new Buffer(@cipher.update buf.toString('binary'))
+      console.log result
+      result
       
   decrypt: (buf) ->
     if @method == null
       encrypt @decryptTable, buf
+    else
+      console.log buf
+      result = new Buffer(@decipher.update buf.toString('binary'))
+      console.log result
+      result
       
 exports.Encryptor = Encryptor

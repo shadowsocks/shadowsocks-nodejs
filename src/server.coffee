@@ -50,6 +50,7 @@ timeout = Math.floor(config.timeout * 1000)
 portPassword = config.port_password
 port = config.server_port
 key = config.password
+METHOD = config.method
 
 if portPassword 
   if port or key
@@ -65,7 +66,7 @@ for port, key of portPassword
     PORT = port
     KEY = key
     util.log "calculating ciphers for port #{PORT}"
-    encryptor = new Encryptor(KEY, null)
+    encryptor = new Encryptor(KEY, METHOD)
     
     server = net.createServer((connection) ->
       stage = 0
@@ -76,7 +77,7 @@ for port, key of portPassword
       remoteAddr = null
       remotePort = null
       connection.on "data", (data) ->
-        encryptor.decrypt data
+        data = encryptor.decrypt data
         if stage is 5
           connection.pause()  unless remote.write(data)
           return
@@ -111,7 +112,7 @@ for port, key of portPassword
               stage = 5
             )
             remote.on "data", (data) ->
-              encryptor.encrypt data
+              data = encryptor.encrypt data
               remote.pause()  unless connection.write(data)
     
             remote.on "end", ->
