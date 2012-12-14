@@ -7,7 +7,8 @@
       '-l': 'local_port',
       '-p': 'server_port',
       '-s': 'server',
-      '-k': 'password'
+      '-k': 'password',
+      '-c': 'config_file'
     };
     result = {};
     nextIsValue = false;
