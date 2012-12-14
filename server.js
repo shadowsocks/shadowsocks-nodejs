@@ -57,7 +57,7 @@
     }
   } else {
     portPassword = {};
-    portPassword[PORT.toString()] = KEY;
+    portPassword[port.toString()] = key;
   }
 
   _fn = function() {

@@ -54,7 +54,7 @@ if portPassword
     console.error 'warning: port_password should not be used with server_port and password. server_port and password will be ignored'
 else
   portPassword = {}
-  portPassword[PORT.toString()] = KEY
+  portPassword[port.toString()] = key
     
   
 for port, key of portPassword
