@@ -27,6 +27,7 @@ cachedTables = {} # password: [encryptTable, decryptTable]
 getTable = (key) ->
   if cachedTables[key]
     return cachedTables[key]
+  util.log "calculating ciphers"
   table = new Array(256)
   decrypt_table = new Array(256)
   md5sum = crypto.createHash("md5")
@@ -75,18 +76,14 @@ class Encryptor
     if @method == null
       encrypt @encryptTable, buf
     else
-      console.log buf
-      result = new Buffer(@cipher.update buf.toString('binary'))
-      console.log result
+      result = new Buffer(@cipher.update(buf.toString('binary')), 'binary')
       result
       
   decrypt: (buf) ->
     if @method == null
       encrypt @decryptTable, buf
     else
-      console.log buf
-      result = new Buffer(@decipher.update buf.toString('binary'))
-      console.log result
+      result = new Buffer(@decipher.update(buf.toString('binary')), 'binary')
       result
       
 exports.Encryptor = Encryptor

@@ -8,7 +8,8 @@
       '-p': 'server_port',
       '-s': 'server',
       '-k': 'password',
-      '-c': 'config_file'
+      '-c': 'config_file',
+      '-m': 'method'
     };
     result = {};
     nextIsValue = false;

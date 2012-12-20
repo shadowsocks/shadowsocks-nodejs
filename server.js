@@ -65,13 +65,12 @@
   }
 
   _fn = function() {
-    var KEY, PORT, encryptor, server;
+    var KEY, PORT, server;
     PORT = port;
     KEY = key;
-    util.log("calculating ciphers for port " + PORT);
-    encryptor = new Encryptor(KEY, METHOD);
     server = net.createServer(function(connection) {
-      var addrLen, cachedPieces, headerLength, remote, remoteAddr, remotePort, stage;
+      var addrLen, cachedPieces, encryptor, headerLength, remote, remoteAddr, remotePort, stage;
+      encryptor = new Encryptor(KEY, METHOD);
       stage = 0;
       headerLength = 0;
       remote = null;
@@ -95,6 +94,7 @@
               addrLen = data[1];
             } else if (addrtype !== 1) {
               util.log("unsupported addrtype: " + addrtype);
+              console.log(data);
               connection.end();
               return;
             }

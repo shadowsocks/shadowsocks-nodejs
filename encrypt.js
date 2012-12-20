@@ -15,6 +15,7 @@
     if (cachedTables[key]) {
       return cachedTables[key];
     }
+    util.log("calculating ciphers");
     table = new Array(256);
     decrypt_table = new Array(256);
     md5sum = crypto.createHash("md5");
@@ -72,9 +73,7 @@
       if (this.method === null) {
         return encrypt(this.encryptTable, buf);
       } else {
-        console.log(buf);
-        result = new Buffer(this.cipher.update(buf.toString('binary')));
-        console.log(result);
+        result = new Buffer(this.cipher.update(buf.toString('binary')), 'binary');
         return result;
       }
     };
@@ -84,9 +83,7 @@
       if (this.method === null) {
         return encrypt(this.decryptTable, buf);
       } else {
-        console.log(buf);
-        result = new Buffer(this.decipher.update(buf.toString('binary')));
-        console.log(result);
+        result = new Buffer(this.decipher.update(buf.toString('binary')), 'binary');
         return result;
       }
     };

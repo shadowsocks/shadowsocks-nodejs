@@ -58,10 +58,9 @@ getServer = ->
   else
     SERVER
 
-util.log "calculating ciphers"
-encryptor = new Encryptor(KEY, METHOD)
 
 server = net.createServer((connection) ->
+  encryptor = new Encryptor(KEY, METHOD)
   stage = 0
   headerLength = 0
   remote = null

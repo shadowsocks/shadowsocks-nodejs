@@ -65,10 +65,10 @@ for port, key of portPassword
     # let's use enclosures to seperate scopes of different servers
     PORT = port
     KEY = key
-    util.log "calculating ciphers for port #{PORT}"
-    encryptor = new Encryptor(KEY, METHOD)
+#    util.log "calculating ciphers for port #{PORT}"
     
     server = net.createServer((connection) ->
+      encryptor = new Encryptor(KEY, METHOD)
       stage = 0
       headerLength = 0
       remote = null
@@ -88,6 +88,7 @@ for port, key of portPassword
               addrLen = data[1]
             else unless addrtype is 1
               util.log "unsupported addrtype: " + addrtype
+              console.log data
               connection.end()
               return
             # read address and port
