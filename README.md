@@ -19,6 +19,7 @@ Edit `config.json`, change the following values:
     local_port      local port
     password        a password used to encrypt transfer
     timeout         in seconds
+    method          encryption method, null by default, or use "rc4"
 
 Put all the files on your server.  Run `node server.js` on your server. To run it in the background, run
 `nohup node server.js > log &`.
@@ -34,5 +35,5 @@ advanced
 
 You can use args to override settings from `config.json`.
 
-    node local.js -s server_name -p server_port -l local_port -k password
-    node server.js -p server_port -k password
+    node local.js -s server_name -p server_port -l local_port -k password -m rc4
+    node server.js -p server_port -k password -m rc4
