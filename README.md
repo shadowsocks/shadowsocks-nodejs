@@ -37,3 +37,6 @@ You can use args to override settings from `config.json`.
 
     node local.js -s server_name -p server_port -l local_port -k password -m rc4
     node server.js -p server_port -k password -m rc4
+
+Example of multi-user server support can be found in `test/config-multi-passwd.json`.
+
