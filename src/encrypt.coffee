@@ -19,6 +19,7 @@
 # SOFTWARE.
 
 crypto = require("crypto")
+util = require("util")
 merge_sort = require("./merge_sort").merge_sort
 int32Max = Math.pow(2, 32)
 
