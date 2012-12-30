@@ -96,4 +96,6 @@
 
   exports.Encryptor = Encryptor;
 
+  exports.getTable = getTable;
+
 }).call(this);

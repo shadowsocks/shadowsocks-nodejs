@@ -23,7 +23,10 @@ net = require("net")
 fs = require("fs")
 path = require("path")
 util = require('util')
+args = require('./args')
 Encryptor = require("./encrypt").Encryptor
+
+console.log(args.version)
 
 inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
@@ -42,7 +45,7 @@ inetAton = (ipStr) ->
 
 configContent = fs.readFileSync(path.resolve(__dirname, "config.json"))
 config = JSON.parse(configContent)
-configFromArgs = require('./args').parseArgs()
+configFromArgs = args.parseArgs()
 for k, v of configFromArgs
   config[k] = v
 SERVER = config.server

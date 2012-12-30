@@ -88,3 +88,4 @@ class Encryptor
       result
       
 exports.Encryptor = Encryptor
+exports.getTable = getTable

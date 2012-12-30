@@ -28,4 +28,6 @@
     return result;
   };
 
+  exports.version = "shadowsocks-nodejs v0.9";
+
 }).call(this);
