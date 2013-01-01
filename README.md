@@ -1,6 +1,7 @@
 shadowsocks-nodejs
 ===========
 
+[![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)  
 Current version: 0.9
 
 shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
