@@ -7,3 +7,7 @@ before_install:
 script:
   - cake build
   - cake test
+branches:
+ only:
+   - master
+   - dev
