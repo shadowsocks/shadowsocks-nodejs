@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+ - "0.8"
+before_install:
+  - npm install coffee-script
+script:
+  - cake build
+  - cake test
