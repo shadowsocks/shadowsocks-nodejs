@@ -7,10 +7,10 @@ Current version: 0.9
 shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
  firewalls. It is a port of [shadowsocks](https://github.com/clowwindy/shadowsocks).
 
-The nodejs version has a better performance than the original Python version.
-
 The protocol is compatible with the origin shadowsocks(if both have been upgraded to the
  latest version). For example, you can use a python client with a nodejs server.
+
+Other ports and clients can be found [here](https://github.com/clowwindy/shadowsocks/wiki/Ports-and-Clients).
 
 usage
 -----------
