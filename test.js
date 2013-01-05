@@ -41,7 +41,7 @@
   runCurl = function() {
     var curl;
     curlRunning = true;
-    curl = child_process.spawn('curl', ['-v', 'http://www.google.com/', '-L', '--socks5', '127.0.0.1:1080']);
+    curl = child_process.spawn('curl', ['-v', 'http://www.example.com/', '-L', '--socks5', '127.0.0.1:1080']);
     curl.on('exit', function(code) {
       local.kill();
       server.kill();
@@ -54,23 +54,23 @@
       }
     });
     curl.stdout.on('data', function(data) {
-      return console.log(data.toString());
+      return process.stdout.write(data);
     });
     return curl.stderr.on('data', function(data) {
-      return console.warn(data.toString());
+      return process.stderr.write(data);
     });
   };
 
   local.stderr.on('data', function(data) {
-    return console.warn(data.toString());
+    return process.stderr.write(data);
   });
 
   server.stderr.on('data', function(data) {
-    return console.warn(data.toString());
+    return process.stderr.write(data);
   });
 
   local.stdout.on('data', function(data) {
-    console.log(data.toString());
+    process.stdout.write(data);
     if (data.toString().indexOf('listening at port') >= 0) {
       localReady = true;
       if (localReady && serverReady && !curlRunning) {
@@ -80,7 +80,7 @@
   });
 
   server.stdout.on('data', function(data) {
-    console.log(data.toString());
+    process.stdout.write(data);
     if (data.toString().indexOf('listening at port') >= 0) {
       serverReady = true;
       if (localReady && serverReady && !curlRunning) {

@@ -31,7 +31,7 @@ curlRunning = false
 
 runCurl = ->
   curlRunning = true
-  curl = child_process.spawn 'curl', ['-v', 'http://www.google.com/', '-L', '--socks5', '127.0.0.1:1080']
+  curl = child_process.spawn 'curl', ['-v', 'http://www.example.com/', '-L', '--socks5', '127.0.0.1:1080']
   curl.on 'exit', (code)->
     local.kill()
     server.kill()
@@ -43,26 +43,26 @@ runCurl = ->
       process.exit code
 
   curl.stdout.on 'data', (data) ->
-    console.log data.toString()
+    process.stdout.write(data)
 
   curl.stderr.on 'data', (data) ->
-    console.warn data.toString()
+    process.stderr.write(data)
 
 local.stderr.on 'data', (data) ->
-  console.warn data.toString()
+  process.stderr.write(data)
 
 server.stderr.on 'data', (data) ->
-  console.warn data.toString()
+  process.stderr.write(data)
 
 local.stdout.on 'data', (data) ->
-  console.log data.toString()
+  process.stdout.write(data)
   if data.toString().indexOf('listening at port') >= 0
     localReady = true
     if localReady and serverReady and not curlRunning
       runCurl()
 
 server.stdout.on 'data', (data) ->
-  console.log data.toString()
+  process.stdout.write(data)
   if data.toString().indexOf('listening at port') >= 0
     serverReady = true
     if localReady and serverReady and not curlRunning
