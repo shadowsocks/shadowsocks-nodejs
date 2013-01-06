@@ -67,25 +67,25 @@ encrypt = (table, buf) ->
 
 class Encryptor
   constructor: (key, @method) ->
-    if @method == null
-      [@encryptTable, @decryptTable] = getTable(key)
-    else
+    if @method?
       @cipher = crypto.createCipher @method, key
       @decipher = crypto.createDecipher @method, key
+    else
+      [@encryptTable, @decryptTable] = getTable(key)
       
   encrypt: (buf) ->
-    if @method == null
-      encrypt @encryptTable, buf
-    else
+    if @method?
       result = new Buffer(@cipher.update(buf.toString('binary')), 'binary')
       result
+    else
+      encrypt @encryptTable, buf
       
   decrypt: (buf) ->
-    if @method == null
-      encrypt @decryptTable, buf
-    else
+    if @method?
       result = new Buffer(@decipher.update(buf.toString('binary')), 'binary')
       result
+    else
+      encrypt @decryptTable, buf
       
 exports.Encryptor = Encryptor
 exports.getTable = getTable
