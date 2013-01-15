@@ -53,6 +53,7 @@ portPassword = config.port_password
 port = config.server_port
 key = config.password
 METHOD = config.method
+SERVER = config.server
 
 if portPassword 
   if port or key
@@ -163,10 +164,12 @@ for port, key of portPassword
         remote.destroy()  if remote
         connection.destroy()
     )
-    server.listen PORT, '0.0.0.0', ->
-      util.log "server listening at port " + PORT
-    server.listen PORT, '::', ->
-      util.log "server listening at port " + PORT
+    servers = SERVER
+    unless servers instanceof Array
+      servers = [servers]
+    for server_ip in servers
+      server.listen PORT, server_ip, ->
+        util.log "server listening at #{server_ip}:#{PORT} "
     
     server.on "error", (e) ->
       util.warn "Address in use, aborting"  if e.code is "EADDRINUSE"

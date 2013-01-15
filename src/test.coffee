@@ -62,14 +62,14 @@ server.stderr.on 'data', (data) ->
 
 local.stdout.on 'data', (data) ->
   process.stdout.write(data)
-  if data.toString().indexOf('listening at port') >= 0
+  if data.toString().indexOf('listening at') >= 0
     localReady = true
     if localReady and serverReady and not curlRunning
       runCurl()
 
 server.stdout.on 'data', (data) ->
   process.stdout.write(data)
-  if data.toString().indexOf('listening at port') >= 0
+  if data.toString().indexOf('listening at') >= 0
     serverReady = true
     if localReady and serverReady and not curlRunning
       runCurl()

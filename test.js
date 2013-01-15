@@ -79,7 +79,7 @@
 
   local.stdout.on('data', function(data) {
     process.stdout.write(data);
-    if (data.toString().indexOf('listening at port') >= 0) {
+    if (data.toString().indexOf('listening at') >= 0) {
       localReady = true;
       if (localReady && serverReady && !curlRunning) {
         return runCurl();
@@ -89,7 +89,7 @@
 
   server.stdout.on('data', function(data) {
     process.stdout.write(data);
-    if (data.toString().indexOf('listening at port') >= 0) {
+    if (data.toString().indexOf('listening at') >= 0) {
       serverReady = true;
       if (localReady && serverReady && !curlRunning) {
         return runCurl();
