@@ -191,8 +191,9 @@
     });
     return server.on("error", function(e) {
       if (e.code === "EADDRINUSE") {
-        return util.warn("Address in use, aborting");
+        util.warn("Address in use, aborting");
       }
+      return process.exit(1);
     });
   };
   for (port in portPassword) {

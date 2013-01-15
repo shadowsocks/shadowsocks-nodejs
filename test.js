@@ -24,12 +24,20 @@
 
   server = child_process.spawn('node', ['server.js']);
 
-  local.on('exit', function() {
-    return server.kill();
+  curlRunning = false;
+
+  local.on('exit', function(code) {
+    server.kill();
+    if (!curlRunning) {
+      return process.exit(code);
+    }
   });
 
-  server.on('exit', function() {
-    return local.kill();
+  server.on('exit', function(code) {
+    local.kill();
+    if (!curlRunning) {
+      return process.exit(code);
+    }
   });
 
   localReady = false;

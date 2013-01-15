@@ -219,8 +219,9 @@
 
   server.on("error", function(e) {
     if (e.code === "EADDRINUSE") {
-      return util.log("Address in use, aborting");
+      util.log("Address in use, aborting");
     }
+    return process.exit(1);
   });
 
 }).call(this);

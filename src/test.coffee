@@ -19,11 +19,17 @@ child_process = require('child_process')
 local = child_process.spawn('node', ['local.js'])
 server = child_process.spawn('node', ['server.js'])
 
-local.on 'exit', ->
-  server.kill()
+curlRunning = false
 
-server.on 'exit', ->
+local.on 'exit', (code)->
+  server.kill()
+  if !curlRunning
+    process.exit code
+
+server.on 'exit', (code)->
   local.kill()
+  if !curlRunning
+    process.exit code
 
 localReady = false
 serverReady = false

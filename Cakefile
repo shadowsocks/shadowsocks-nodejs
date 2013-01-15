@@ -1,7 +1,7 @@
 {print} = require 'util'
 {spawn} = require 'child_process'
 
-build = (callback) ->
+build = () ->
   os = require 'os'
   if os.platform() == 'win32'
     coffeeCmd = 'coffee.cmd'
@@ -13,9 +13,10 @@ build = (callback) ->
   coffee.stdout.on 'data', (data) ->
     print data.toString()
   coffee.on 'exit', (code) ->
-    callback?() if code is 0
+    if code != 0
+      process.exit code
 
-test = (callback) ->
+test = () ->
   os = require 'os'
   coffee = spawn 'node', ['test.js']
   coffee.stderr.on 'data', (data) ->
@@ -23,10 +24,12 @@ test = (callback) ->
   coffee.stdout.on 'data', (data) ->
     print data.toString()
   coffee.on 'exit', (code) ->
-    callback?() if code is 0
+    if code != 0
+      process.exit code
 
 task 'build', 'Build ./ from src/', ->
   build()
 
 task 'test', 'Run unit test', ->
   test()
+

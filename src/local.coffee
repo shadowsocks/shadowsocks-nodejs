@@ -198,3 +198,4 @@ server.listen PORT, ->
 
 server.on "error", (e) ->
   util.log "Address in use, aborting"  if e.code is "EADDRINUSE"
+  process.exit 1

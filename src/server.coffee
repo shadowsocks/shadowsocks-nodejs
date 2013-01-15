@@ -168,5 +168,6 @@ for port, key of portPassword
     
     server.on "error", (e) ->
       util.warn "Address in use, aborting"  if e.code is "EADDRINUSE"
+      process.exit 1
   )()
 
