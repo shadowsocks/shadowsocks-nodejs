@@ -17,7 +17,7 @@ usage
 
 Edit `config.json`, change the following values:
 
-    server          your server ip or hostname
+    server          your server IP (IPv4/IPv6), notice that your server will listen to this IP
     server_port     server port
     local_port      local port
     password        a password used to encrypt transfer
