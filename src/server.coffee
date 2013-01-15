@@ -163,7 +163,9 @@ for port, key of portPassword
         remote.destroy()  if remote
         connection.destroy()
     )
-    server.listen PORT, ->
+    server.listen PORT, '0.0.0.0', ->
+      util.log "server listening at port " + PORT
+    server.listen PORT, '::', ->
       util.log "server listening at port " + PORT
     
     server.on "error", (e) ->

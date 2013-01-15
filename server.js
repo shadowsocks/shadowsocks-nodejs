@@ -186,7 +186,10 @@
         return connection.destroy();
       });
     });
-    server.listen(PORT, function() {
+    server.listen(PORT, '0.0.0.0', function() {
+      return util.log("server listening at port " + PORT);
+    });
+    server.listen(PORT, '::', function() {
       return util.log("server listening at port " + PORT);
     });
     return server.on("error", function(e) {
