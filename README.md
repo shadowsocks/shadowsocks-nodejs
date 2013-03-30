@@ -16,7 +16,7 @@ Other ports and clients can be found [here](https://github.com/clowwindy/shadows
 Usage
 -----------
 
-Download the lastest Node **v0.10** or **v0.6** stable release. 
+Download the lastest Node **v0.10** stable release. 
 
     wget http://nodejs.org/dist/v0.10.2/node-v0.10.2.tar.gz
     tar xf node-v0.10.2.tar.gz
