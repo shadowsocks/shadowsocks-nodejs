@@ -21,13 +21,14 @@ Download the lastest Node **v0.8** or **v0.6** stable release. You can find them
 
     wget http://nodejs.org/dist/v0.8.22/node-v0.8.22.tar.gz
     tar xf node-v0.8.22.tar.gz
-    cd node-v0.8.22
+    cd node-v0.8.22/
     ./configure
     make -j2 && sudo make install
     
 Clone the repo:
 
-    git://github.com/clowwindy/shadowsocks-nodejs.git
+    git clone git://github.com/clowwindy/shadowsocks-nodejs.git
+    cd shadowsocks-nodejs
 
 Edit `config.json`, change the following values:
 
