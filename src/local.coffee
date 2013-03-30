@@ -72,11 +72,12 @@ server = net.createServer((connection) ->
   remoteAddr = null
   remotePort = null
   addrToSend = ""
-  connection.on "data", (data) ->
+  connection.on "readable", ->
+    data = connection.read()
     if stage is 5
       # pipe sockets
       data = encryptor.encrypt data
-      connection.pause()  unless remote.write(data)
+      remote.write(data)
       return
     if stage is 0
       tempBuf = new Buffer(2)
@@ -141,9 +142,10 @@ server = net.createServer((connection) ->
           cachedPieces = null # save memory
           stage = 5
         )
-        remote.on "data", (data) ->
+        remote.on "readable", ->
+          data = remote.read()
           data = encryptor.decrypt data
-          remote.pause()  unless connection.write(data)
+          connection.write(data)
 
         remote.on "end", ->
           connection.end()
@@ -154,9 +156,6 @@ server = net.createServer((connection) ->
             connection.destroy()
             return
           connection.end()
-
-        remote.on "drain", ->
-          connection.resume()
 
         remote.setTimeout timeout, ->
           connection.end()
@@ -184,10 +183,6 @@ server = net.createServer((connection) ->
   connection.on "error", (e)->
     util.log "local error: #{e}"
     remote.destroy()  if remote
-
-  connection.on "drain", ->
-    # calling resume() when remote not is connected will crash node.js
-    remote.resume()  if remote and stage is 5
 
   connection.setTimeout timeout, ->
     remote.destroy()  if remote

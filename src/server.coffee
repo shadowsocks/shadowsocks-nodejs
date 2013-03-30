@@ -79,10 +79,11 @@ for port, key of portPassword
       addrLen = 0
       remoteAddr = null
       remotePort = null
-      connection.on "data", (data) ->
+      connection.on "readable", ->
+        data = connection.read()
         data = encryptor.decrypt data
         if stage is 5
-          connection.pause()  unless remote.write(data)
+          remote.write(data)
           return
         if stage is 0
           try
@@ -115,9 +116,10 @@ for port, key of portPassword
               cachedPieces = null # save memory
               stage = 5
             )
-            remote.on "data", (data) ->
+            remote.on "readable", ->
+              data = remote.read()
               data = encryptor.encrypt data
-              remote.pause()  unless connection.write(data)
+              connection.write(data)
     
             remote.on "end", ->
               connection.end()
@@ -125,9 +127,6 @@ for port, key of portPassword
             remote.on "error", (e)->
               util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
               connection.destroy()
-    
-            remote.on "drain", ->
-              connection.resume()
     
             remote.setTimeout timeout, ->
               connection.end()
@@ -156,9 +155,6 @@ for port, key of portPassword
       connection.on "error", (e)->
         util.log "local error: #{e}"
         remote.destroy()  if remote
-    
-      connection.on "drain", ->
-        remote.resume()  if remote
     
       connection.setTimeout timeout, ->
         remote.destroy()  if remote
