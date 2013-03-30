@@ -1,4 +1,7 @@
 
+exports.version = "shadowsocks-nodejs v0.10.0-dev"
+exports.requiredNodeVersion = "0.10.0"
+
 exports.parseArgs = ->
   defination =
     '-l': 'local_port'
@@ -20,5 +23,22 @@ exports.parseArgs = ->
       nextIsValue = true
   result
 
-exports.version = "shadowsocks-nodejs v0.10.0-dev"
+
+exports.compareVersion = (l, r) ->
+  # compare two version numbers
+  ls = l.split '.'
+  rs = r.split '.'
+  for i in [0..Math.min(ls.length, rs.length)]
+    lp = ls[i]
+    rp = rs[i]
+    if lp != rp
+      return lp - rp
+   return ls.length - rs.length
+
+exports.requireVersion = (version) ->
+  nodeVersion = process.versions.node
+  if exports.compareVersion(nodeVersion, version) < 0
+    throw new Error("Node version must >= #{version}")
+
+exports.requireVersion exports.requiredNodeVersion
 
