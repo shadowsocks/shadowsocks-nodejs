@@ -1,8 +1,9 @@
 shadowsocks-nodejs
 ===========
 
-[![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)  
-Current version: 0.9.6
+Current version: 0.9.6 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
+
+**Notice: Please use Node v0.8 or v0.6, DO NOT USE v0.10**
 
 shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
  firewalls. It is a port of [shadowsocks](https://github.com/clowwindy/shadowsocks).
@@ -12,8 +13,21 @@ The protocol is compatible with the origin shadowsocks(if both have been upgrade
 
 Other ports and clients can be found [here](https://github.com/clowwindy/shadowsocks/wiki/Ports-and-Clients).
 
-usage
+Usage
 -----------
+
+Download the lastest Node **v0.8** or **v0.6** stable release. You can find them [here](http://nodejs.org/dist/).
+**Don't use Node v0.10!**
+
+    wget http://nodejs.org/dist/v0.8.22/node-v0.8.22.tar.gz
+    tar xf node-v0.8.22.tar.gz
+    cd node-v0.8.22
+    ./configure
+    make -j2 && sudo make install
+    
+Clone the repo:
+
+    git://github.com/clowwindy/shadowsocks-nodejs.git
 
 Edit `config.json`, change the following values:
 
@@ -24,16 +38,18 @@ Edit `config.json`, change the following values:
     timeout         in seconds
     method          encryption method, null by default, or use "rc4"
 
-Put all the files on your server.  Run `node server.js` on your server. To run it in the background, run
+Run `node server.js` on your server. To run it in the background, run
 `nohup node server.js > log &`.
 
-Put all the files on your client machine. Run `node local.js` on your client machine.
+On your client machine, run `node local.js`.
 
-Change proxy settings of your browser into
+Change the proxy setting in your browser into
 
-    SOCKS5 127.0.0.1:local_port
+    protocol: socks5
+    hostname: 127.0.0.1
+    port:     your local_port
 
-advanced
+Advanced
 ------------
 
 You can use args to override settings from `config.json`.
@@ -43,3 +59,9 @@ You can use args to override settings from `config.json`.
 
 Example of multi-user server support can be found in `test/config-multi-passwd.json`.
 
+What's wrong with Node v0.10?
+-----------------------------
+Node v0.10 moved to new Readable Stream API. Though it's almost backward compatible, it has introduced a bug, resulting in
+memory leaks.
+
+If you have any ideas about this, please file an issue.
