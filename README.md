@@ -1,9 +1,9 @@
 shadowsocks-nodejs
 ===========
 
-Current version: 0.9.6 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
+Current version: 0.10.0-dev [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png?branch=node-v0.10)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
 
-**Notice: Please use Node v0.8 or v0.6, DO NOT USE v0.10**
+**Notice: This branch is for Node v0.10**
 
 shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
  firewalls. It is a port of [shadowsocks](https://github.com/clowwindy/shadowsocks).
@@ -16,18 +16,18 @@ Other ports and clients can be found [here](https://github.com/clowwindy/shadows
 Usage
 -----------
 
-Download the lastest Node **v0.8** or **v0.6** stable release. You can find them [here](http://nodejs.org/dist/).
-**Don't use Node v0.10!**
+Download the lastest Node **v0.10** or **v0.6** stable release. 
 
-    wget http://nodejs.org/dist/v0.8.22/node-v0.8.22.tar.gz
-    tar xf node-v0.8.22.tar.gz
-    cd node-v0.8.22/
+    wget http://nodejs.org/dist/v0.10.2/node-v0.10.2.tar.gz
+    tar xf node-v0.10.2.tar.gz
+    cd node-v0.10.2/
     ./configure
     make -j2 && sudo make install
-    
-Clone the repo:
+
+Clone the repo and **switch to node-v0.10 branch**:
 
     git clone git://github.com/clowwindy/shadowsocks-nodejs.git
+    git checkout node-v0.10
     cd shadowsocks-nodejs
 
 Edit `config.json`, change the following values:
@@ -64,5 +64,7 @@ What's wrong with Node v0.10?
 -----------------------------
 Node v0.10 moved to new Readable Stream API. Though it's almost backward compatible, it has introduced a bug, resulting in
 memory leaks.
+
+So I decided to create a new node-v0.10 branch, in which only the new API is used.
 
 If you have any ideas about this, please file an issue.
