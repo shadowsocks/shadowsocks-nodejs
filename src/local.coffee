@@ -73,11 +73,13 @@ server = net.createServer((connection) ->
   remotePort = null
   addrToSend = ""
   connection.on "readable", ->
+    if connection.paused
+      return
     data = connection.read()
     if stage is 5
       # pipe sockets
       data = encryptor.encrypt data
-      remote.write(data)
+      connection.paused = not remote.write(data)
       return
     if stage is 0
       tempBuf = new Buffer(2)
@@ -143,9 +145,16 @@ server = net.createServer((connection) ->
           stage = 5
         )
         remote.on "readable", ->
+          if remote.paused
+            return
           data = remote.read()
           data = encryptor.decrypt data
-          connection.write(data)
+          remote.paused = not connection.write(data)
+
+        remote.on "drain", ->
+          if connection
+            connection.paused = false
+            connection.emit "readable"
 
         remote.on "end", ->
           connection.end()
@@ -176,6 +185,11 @@ server = net.createServer((connection) ->
       # remote server not connected
       # cache received buffers
       # make sure no data is lost
+
+  connection.on "drain", ->
+    if remote
+      remote.paused = false
+      remote.emit "readable"
 
   connection.on "end", ->
     remote.destroy()  if remote

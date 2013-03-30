@@ -90,10 +90,13 @@
       connection.on("readable", function() {
         var addrtype, buf, data, e;
 
+        if (connection.paused) {
+          return;
+        }
         data = connection.read();
         data = encryptor.decrypt(data);
         if (stage === 5) {
-          remote.write(data);
+          connection.paused = !remote.write(data);
           return;
         }
         if (stage === 0) {
@@ -130,9 +133,18 @@
               return stage = 5;
             });
             remote.on("readable", function() {
+              if (remote.paused) {
+                return;
+              }
               data = remote.read();
               data = encryptor.encrypt(data);
-              return connection.write(data);
+              return remote.paused = !connection.write(data);
+            });
+            remote.on("drain", function() {
+              if (connection) {
+                connection.paused = false;
+                return connection.emit("readable");
+              }
             });
             remote.on("end", function() {
               return connection.end();
@@ -164,6 +176,12 @@
           if (stage === 4) {
             return cachedPieces.push(data);
           }
+        }
+      });
+      connection.on("drain", function() {
+        if (remote) {
+          remote.paused = false;
+          return remote.emit("readable");
         }
       });
       connection.on("end", function() {
