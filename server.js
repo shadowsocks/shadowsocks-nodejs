@@ -94,6 +94,9 @@
           return;
         }
         data = connection.read();
+        if (data == null) {
+          return;
+        }
         data = encryptor.decrypt(data);
         if (stage === 5) {
           connection.paused = !remote.write(data);
@@ -137,6 +140,9 @@
                 return;
               }
               data = remote.read();
+              if (data == null) {
+                return;
+              }
               data = encryptor.encrypt(data);
               return remote.paused = !connection.write(data);
             });

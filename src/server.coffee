@@ -83,6 +83,8 @@ for port, key of portPassword
         if connection.paused
           return
         data = connection.read()
+        if not data?
+          return
         data = encryptor.decrypt data
         if stage is 5
           connection.paused = not remote.write(data)
@@ -122,6 +124,8 @@ for port, key of portPassword
               if remote.paused
                 return
               data = remote.read()
+              if not data?
+                return
               data = encryptor.encrypt data
               remote.paused = not connection.write(data)
 

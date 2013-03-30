@@ -76,6 +76,8 @@ server = net.createServer((connection) ->
     if connection.paused
       return
     data = connection.read()
+    if not data?
+      return
     if stage is 5
       # pipe sockets
       data = encryptor.encrypt data
@@ -148,6 +150,8 @@ server = net.createServer((connection) ->
           if remote.paused
             return
           data = remote.read()
+          if not data?
+            return
           data = encryptor.decrypt data
           remote.paused = not connection.write(data)
 
