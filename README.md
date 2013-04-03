@@ -1,7 +1,7 @@
 shadowsocks-nodejs
 ===========
 
-Current version: 0.9.6 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
+Current version: 1.0 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
 
 **Notice: Please use Node v0.8 or v0.6, DO NOT USE v0.10**
 
