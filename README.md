@@ -1,7 +1,8 @@
 shadowsocks-nodejs
 ===========
 
-Current version: 1.0 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
+Current version: 1.0
+[![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
 
 **Notice: Please use Node v0.8 or v0.6, DO NOT USE v0.10**
 
@@ -62,7 +63,10 @@ Example of multi-user server support can be found in `test/config-multi-passwd.j
 
 What's wrong with Node v0.10?
 -----------------------------
-Node v0.10 moved to new Readable Stream API. Though it's almost backward compatible, it has introduced a bug, resulting in
-memory leaks.
+Node v0.10 moved to new Readable Stream API. Though it's almost backward compatible, it has introduced a bug,
+resulting in memory leaks.
+
+I'm working on a [node v0.10 branch](https://github.com/clowwindy/shadowsocks-nodejs/tree/node-v0.10), you
+can try it if you like.
 
 If you have any ideas about this, please file an issue.
