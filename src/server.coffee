@@ -23,6 +23,7 @@ fs = require("fs")
 path = require("path")
 util = require('util')
 args = require("./args")
+inet = require("./inet")
 Encryptor = require("./encrypt").Encryptor
 
 console.log(args.version)
@@ -89,9 +90,8 @@ for port, key of portPassword
             addrtype = data[0]
             if addrtype is 3
               addrLen = data[1]
-            else unless addrtype is 1
+            else unless addrtype in [1, 4]
               util.log "unsupported addrtype: " + addrtype
-              console.log data
               connection.end()
               return
             # read address and port
@@ -99,6 +99,10 @@ for port, key of portPassword
               remoteAddr = inetNtoa(data.slice(1, 5))
               remotePort = data.readUInt16BE(5)
               headerLength = 7
+            else if addrtype is 4
+              remoteAddr = inet.inet_ntop(data.slice(1, 17))
+              remotePort = data.readUInt16BE(17)
+              headerLength = 19
             else
               remoteAddr = data.slice(2, 2 + addrLen).toString("binary")
               remotePort = data.readUInt16BE(2 + addrLen)

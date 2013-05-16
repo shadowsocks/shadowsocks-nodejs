@@ -24,6 +24,7 @@ fs = require("fs")
 path = require("path")
 util = require('util')
 args = require('./args')
+inet = require('./inet')
 Encryptor = require("./encrypt").Encryptor
 
 console.log(args.version)
@@ -102,7 +103,7 @@ server = net.createServer((connection) ->
           return
         if addrtype is 3
           addrLen = data[4]
-        else unless addrtype is 1
+        else unless addrtype in [1, 4]
           util.log "unsupported addrtype: " + addrtype
           connection.end()
           return
@@ -113,6 +114,11 @@ server = net.createServer((connection) ->
           addrToSend += data.slice(4, 10).toString("binary")
           remotePort = data.readUInt16BE(8)
           headerLength = 10
+        else if addrtype is 4
+          remoteAddr = inet.inet_ntop(data.slice(4, 20))
+          addrToSend += data.slice(4, 22).toString("binary")
+          remotePort = data.readUInt16BE(20)
+          headerLength = 22
         else
           remoteAddr = data.slice(5, 5 + addrLen).toString("binary")
           addrToSend += data.slice(4, 5 + addrLen + 2).toString("binary")
