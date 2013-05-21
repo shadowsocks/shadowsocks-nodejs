@@ -25,7 +25,7 @@ Download the lastest Node **v0.8** or **v0.6** stable release. You can find them
     cd node-v0.8.22/
     ./configure
     make -j2 && sudo make install
-    
+
 Clone the repo:
 
     git clone git://github.com/clowwindy/shadowsocks-nodejs.git
@@ -38,7 +38,7 @@ Edit `config.json`, change the following values:
     local_port      local port
     password        a password used to encrypt transfer
     timeout         in seconds
-    method          encryption method, null by default, or use "RC4", "AES-256-CFB", "DES-CFB", "BF-CFB", etc
+    method          encryption method, "bf-cfb", "aes-256-cfb", "des-cfb", "rc4", etc. Default is table
 
 Run `node server.js` on your server. To run it in the background, run
 `nohup node server.js > log &`.
@@ -56,8 +56,8 @@ Advanced
 
 You can use args to override settings from `config.json`.
 
-    node local.js -s server_name -p server_port -l local_port -k password -m rc4
-    node server.js -p server_port -k password -m rc4
+    node local.js -s server_name -p server_port -l local_port -k password -m bf-cfb
+    node server.js -p server_port -k password -m bf-cfb
 
 Example of multi-user server support can be found in `test/config-multi-passwd.json`.
 
