@@ -64,6 +64,9 @@
       var _ref;
 
       this.method = method;
+      if (this.method === 'table') {
+        this.method = null;
+      }
       if (this.method != null) {
         this.cipher = crypto.createCipher(this.method, key);
         this.decipher = crypto.createDecipher(this.method, key);

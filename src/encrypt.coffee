@@ -67,6 +67,8 @@ encrypt = (table, buf) ->
 
 class Encryptor
   constructor: (key, @method) ->
+    if @method == 'table'
+      @method = null
     if @method?
       @cipher = crypto.createCipher @method, key
       @decipher = crypto.createDecipher @method, key

@@ -28,6 +28,6 @@
     return result;
   };
 
-  exports.version = "shadowsocks-nodejs v1.1";
+  exports.version = "shadowsocks-nodejs v1.1.1";
 
 }).call(this);

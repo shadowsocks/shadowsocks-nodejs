@@ -1,7 +1,7 @@
 shadowsocks-nodejs
 ===========
 
-Current version: 1.1
+Current version: 1.1.1
 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
 
 **Notice: Please use Node v0.8 or v0.6, DO NOT USE v0.10**
@@ -38,7 +38,7 @@ Edit `config.json`, change the following values:
     local_port      local port
     password        a password used to encrypt transfer
     timeout         in seconds
-    method          encryption method, null by default, or use "rc4"
+    method          encryption method, null by default, or use "RC4", "AES-256-CFB", "DES-CFB", "BF-CFB", etc
 
 Run `node server.js` on your server. To run it in the background, run
 `nohup node server.js > log &`.
