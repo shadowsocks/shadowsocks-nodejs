@@ -1,2 +1,3 @@
 node local.js
+pause
 
