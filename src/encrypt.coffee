@@ -64,6 +64,12 @@ encrypt = (table, buf) ->
     i++
   buf
 
+to_buffer = (input) ->
+  if input.copy?
+    return input
+  else
+    return new Buffer(input, 'binary')
+
 EVP_BytesToKey = (password, key_len, iv_len) ->
   m = []
   i = 0
@@ -74,7 +80,7 @@ EVP_BytesToKey = (password, key_len, iv_len) ->
     if i > 0
       data = Buffer.concat([m[i - 1], password])
     md5.update(data)
-    d = md5.digest()
+    d = to_buffer md5.digest()
     m.push(d)
     count += d.length
     i += 1
@@ -127,7 +133,7 @@ class Encryptor
 
   encrypt: (buf) ->
     if @method?
-      result = new Buffer(@cipher.update(buf.toString('binary')), 'binary')
+      result = to_buffer @cipher.update(buf.toString('binary'))
       if @iv_sent
         return result
       else
@@ -142,7 +148,7 @@ class Encryptor
         decipher_iv_len = @get_cipher_len(@method)[1]
         decipher_iv = buf.slice(0, decipher_iv_len) 
         @decipher = @get_cipher(@key, @method, 0, decipher_iv)
-        result = new Buffer(@decipher.update(buf.slice(decipher_iv_len).toString('binary')), 'binary')
+        result = to_buffer @decipher.update(buf.slice(decipher_iv_len).toString('binary'))
         return result
       else
         result = new Buffer(@decipher.update(buf.toString('binary')), 'binary')
