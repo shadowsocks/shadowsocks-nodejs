@@ -148,8 +148,11 @@ server = net.createServer((connection) ->
           stage = 5
         )
         remote.on "data", (data) ->
-          data = encryptor.decrypt data
-          remote.pause()  unless connection.write(data)
+          try
+            data = encryptor.decrypt data
+            remote.pause()  unless connection.write(data)
+          catch e
+            remote.emit "error", e
 
         remote.on "end", ->
           connection.end()

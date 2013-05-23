@@ -92,7 +92,13 @@
       connection.on("data", function(data) {
         var addrtype, buf, e;
 
-        data = encryptor.decrypt(data);
+        try {
+          data = encryptor.decrypt(data);
+        } catch (_error) {
+          e = _error;
+          connection.emit("error", e);
+          return;
+        }
         if (stage === 5) {
           if (!remote.write(data)) {
             connection.pause();

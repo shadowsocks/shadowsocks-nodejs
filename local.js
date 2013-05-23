@@ -157,9 +157,16 @@
             return stage = 5;
           });
           remote.on("data", function(data) {
-            data = encryptor.decrypt(data);
-            if (!connection.write(data)) {
-              return remote.pause();
+            var e;
+
+            try {
+              data = encryptor.decrypt(data);
+              if (!connection.write(data)) {
+                return remote.pause();
+              }
+            } catch (_error) {
+              e = _error;
+              return remote.emit("error", e);
             }
           });
           remote.on("end", function() {

@@ -81,7 +81,11 @@ for port, key of portPassword
       remoteAddr = null
       remotePort = null
       connection.on "data", (data) ->
-        data = encryptor.decrypt data
+        try
+          data = encryptor.decrypt data
+        catch e
+          connection.emit "error", e
+          return
         if stage is 5
           connection.pause()  unless remote.write(data)
           return
