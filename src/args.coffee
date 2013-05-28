@@ -20,4 +20,4 @@ exports.parseArgs = ->
       nextIsValue = true
   result
 
-exports.version = "shadowsocks-nodejs v1.2.1"
+exports.version = "shadowsocks-nodejs v1.2.2"
