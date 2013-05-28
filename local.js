@@ -213,9 +213,8 @@
     });
     server.on("error", function(e) {
       if (e.code === "EADDRINUSE") {
-        util.log("Address in use, aborting");
+        return util.log("Address in use, aborting");
       }
-      return process.exit(1);
     });
     return server;
   };
