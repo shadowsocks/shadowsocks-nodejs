@@ -77,3 +77,7 @@ I'm working on a [node v0.10 branch](https://github.com/clowwindy/shadowsocks-no
 CPU 100% problem with node v0.10, you can try this branch if you like.
 
 If you have any ideas about this, please file an issue.
+
+License
+-----------------
+MIT
