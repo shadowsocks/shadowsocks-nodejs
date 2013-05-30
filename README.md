@@ -4,8 +4,6 @@ shadowsocks-nodejs
 Current version: 1.2.2
 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
 
-**Notice: Please use Node v0.8 or v0.6, DO NOT USE v0.10**
-
 shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
  firewalls. It is a port of [shadowsocks](https://github.com/clowwindy/shadowsocks).
 
@@ -17,8 +15,8 @@ Other ports and clients can be found [here](https://github.com/clowwindy/shadows
 Usage
 -----------
 
-Download the lastest Node **v0.8** or **v0.6** stable release. You can find them [here](http://nodejs.org/dist/).
-**Don't use Node v0.10!**
+Download the lastest Node stable release. You can find them [here](http://nodejs.org/). Don't just use master branch of
+Node source code from Github! It's not stable.
 
     wget http://nodejs.org/dist/v0.8.22/node-v0.8.22.tar.gz
     tar xf node-v0.8.22.tar.gz
@@ -61,12 +59,21 @@ You can use args to override settings from `config.json`.
 
 Example of multi-user server support can be found in `test/config-multi-passwd.json`.
 
-What's wrong with Node v0.10?
+Developing
 -----------------------------
-Node v0.10 moved to new Readable Stream API. Though it's almost backward compatible, it has introduced a bug,
-resulting in memory leaks.
 
-I'm working on a [node v0.10 branch](https://github.com/clowwindy/shadowsocks-nodejs/tree/node-v0.10), you
-can try it if you like.
+You can build coffee source code and test it:
+
+    npm install -g coffee-script
+    cake build test
+
+
+Issue with Node v0.10
+-----------------------------
+Node v0.10 moved to new Readable Stream API. Though it's almost backward compatible, its early versions may have
+introduced a bug, resulting in memory leaks.
+
+I'm working on a [node v0.10 branch](https://github.com/clowwindy/shadowsocks-nodejs/tree/node-v0.10), if you have
+CPU 100% problem with node v0.10, you can try this branch if you like.
 
 If you have any ideas about this, please file an issue.
