@@ -180,7 +180,7 @@ for port, key of portPassword
         util.log "server listening at #{server_ip}:#{PORT} "
     
     server.on "error", (e) ->
-      util.warn "Address in use, aborting"  if e.code is "EADDRINUSE"
+      util.log "Address in use, aborting"  if e.code is "EADDRINUSE"
       process.exit 1
   )()
 
