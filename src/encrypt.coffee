@@ -70,7 +70,11 @@ to_buffer = (input) ->
   else
     return new Buffer(input, 'binary')
 
+bytes_to_key_results = {}
+
 EVP_BytesToKey = (password, key_len, iv_len) ->
+  if bytes_to_key_results[password]
+    return bytes_to_key_results[password]
   m = []
   i = 0
   count = 0
@@ -87,6 +91,7 @@ EVP_BytesToKey = (password, key_len, iv_len) ->
   ms = Buffer.concat(m)
   key = ms.slice(0, key_len)
   iv = ms.slice(key_len, key_len + iv_len)
+  bytes_to_key_results[password] = [key, iv]
   return [key, iv]
 
 
