@@ -174,8 +174,8 @@
                 if (remote) {
                   remote.destroy();
                 }
+                return;
               }
-              return;
               data = encryptor.encrypt(data);
               if (!connection.write(data)) {
                 return remote.pause();
