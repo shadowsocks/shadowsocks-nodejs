@@ -80,6 +80,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
         tempBuf.write "\u0005\u0000", 0
         connection.write tempBuf
         stage = 1
+        utils.debug "stage = 1"
         return
       if stage is 1
         try
@@ -145,6 +146,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
               i++
             cachedPieces = null # save memory
             stage = 5
+            utils.debug "stage = 5"
           )
           remote.on "data", (data) ->
             utils.log utils.EVERYTHING, "remote on data"
@@ -186,6 +188,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
             cachedPieces.push buf
             buf = null
           stage = 4
+          utils.debug "stage = 4"
         catch e
           # may encounter index out of range
           utils.error e

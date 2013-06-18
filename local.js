@@ -82,6 +82,7 @@
           tempBuf.write("\u0005\u0000", 0);
           connection.write(tempBuf);
           stage = 1;
+          utils.debug("stage = 1");
           return;
         }
         if (stage === 1) {
@@ -145,7 +146,8 @@
                 i++;
               }
               cachedPieces = null;
-              return stage = 5;
+              stage = 5;
+              return utils.debug("stage = 5");
             });
             remote.on("data", function(data) {
               var e;
@@ -204,7 +206,8 @@
               cachedPieces.push(buf);
               buf = null;
             }
-            return stage = 4;
+            stage = 4;
+            return utils.debug("stage = 4");
           } catch (_error) {
             e = _error;
             utils.error(e);

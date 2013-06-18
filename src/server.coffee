@@ -141,6 +141,7 @@ for port, key of portPassword
                 i++
               cachedPieces = null # save memory
               stage = 5
+              utils.debug "stage = 5"
             )
             remote.on "data", (data) ->
               utils.log utils.EVERYTHING, "remote on data"
@@ -181,6 +182,7 @@ for port, key of portPassword
               cachedPieces.push buf
               buf = null
             stage = 4
+            utils.debug "stage = 4"
           catch e
             # may encouter index out of range
             util.log e

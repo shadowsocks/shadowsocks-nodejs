@@ -165,7 +165,8 @@
                 i++;
               }
               cachedPieces = null;
-              return stage = 5;
+              stage = 5;
+              return utils.debug("stage = 5");
             });
             remote.on("data", function(data) {
               utils.log(utils.EVERYTHING, "remote on data");
@@ -217,7 +218,8 @@
               cachedPieces.push(buf);
               buf = null;
             }
-            return stage = 4;
+            stage = 4;
+            return utils.debug("stage = 4");
           } catch (_error) {
             e = _error;
             util.log(e);
