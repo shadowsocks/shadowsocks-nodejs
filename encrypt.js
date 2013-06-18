@@ -182,7 +182,7 @@
           result = to_buffer(this.decipher.update(buf.slice(decipher_iv_len).toString('binary')));
           return result;
         } else {
-          result = new Buffer(this.decipher.update(buf.toString('binary')), 'binary');
+          result = to_buffer(this.decipher.update(buf.toString('binary')));
           return result;
         }
       } else {
