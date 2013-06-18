@@ -152,6 +152,12 @@
               var i, piece;
 
               utils.info("connecting " + remoteAddr + ":" + remotePort);
+              if (!encryptor) {
+                if (remote) {
+                  remote.destroy();
+                }
+              }
+              return;
               i = 0;
               while (i < cachedPieces.length) {
                 piece = cachedPieces[i];

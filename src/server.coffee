@@ -130,6 +130,9 @@ for port, key of portPassword
             # connect remote server
             remote = net.connect(remotePort, remoteAddr, ->
               utils.info "connecting #{remoteAddr}:#{remotePort}"
+              if not encryptor
+                remote.destroy() if remote
+              return
               i = 0
     
               while i < cachedPieces.length
