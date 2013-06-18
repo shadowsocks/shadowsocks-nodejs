@@ -147,7 +147,7 @@ for port, key of portPassword
               utils.log utils.EVERYTHING, "remote on data"
               if not encryptor
                 remote.destroy() if remote
-              return
+                return
               data = encryptor.encrypt data
               remote.pause()  unless connection.write(data)
     
