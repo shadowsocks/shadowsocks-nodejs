@@ -156,8 +156,8 @@
                 if (remote) {
                   remote.destroy();
                 }
+                return;
               }
-              return;
               i = 0;
               while (i < cachedPieces.length) {
                 piece = cachedPieces[i];

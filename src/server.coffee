@@ -132,7 +132,7 @@ for port, key of portPassword
               utils.info "connecting #{remoteAddr}:#{remotePort}"
               if not encryptor
                 remote.destroy() if remote
-              return
+                return
               i = 0
     
               while i < cachedPieces.length
