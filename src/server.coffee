@@ -22,11 +22,11 @@ net = require("net")
 fs = require("fs")
 path = require("path")
 util = require('util')
-args = require("./args")
+utils = require("./utils")
 inet = require("./inet")
 Encryptor = require("./encrypt").Encryptor
 
-console.log(args.version)
+console.log(utils.version)
 
 inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
@@ -43,7 +43,7 @@ inetAton = (ipStr) ->
       i++
     buf
 
-configFromArgs = args.parseArgs()
+configFromArgs = utils.parseArgs()
 configFile = configFromArgs.config_file or path.resolve(__dirname, "config.json")
 configContent = fs.readFileSync(configFile)
 config = JSON.parse(configContent)
@@ -80,11 +80,19 @@ for port, key of portPassword
       addrLen = 0
       remoteAddr = null
       remotePort = null
+      
+      clean = ->
+        remote = null
+        connection = null
+        encryptor = null
+
       connection.on "data", (data) ->
         try
           data = encryptor.decrypt data
         catch e
-          connection.emit "error", e
+          utils.error e
+          remote.destroy()
+          connection.destroy()
           return
         if stage is 5
           connection.pause()  unless remote.write(data)
@@ -96,7 +104,7 @@ for port, key of portPassword
               addrLen = data[1]
             else unless addrtype in [1, 4]
               util.log "unsupported addrtype: " + addrtype
-              connection.end()
+              connection.destroy()
               return
             # read address and port
             if addrtype is 1
@@ -128,18 +136,23 @@ for port, key of portPassword
               remote.pause()  unless connection.write(data)
     
             remote.on "end", ->
-              connection.end()
+              connection.end() if connection
     
             remote.on "error", (e)->
               util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
-              connection.destroy()
+ 
+            remote.on "close", (had_error)->
+              if had_error
+                connection.destroy() if connection
+              else
+                connection.end() if connection
     
             remote.on "drain", ->
               connection.resume()
     
             remote.setTimeout timeout, ->
-              connection.end()
               remote.destroy()
+              connection.destroy()
     
             if data.length > headerLength
               # make sure no data is lost
@@ -159,18 +172,25 @@ for port, key of portPassword
           # make sure no data is lost
     
       connection.on "end", ->
-        remote.destroy()  if remote
-    
+        remote.end()  if remote
+     
       connection.on "error", (e)->
         util.log "local error: #{e}"
-        remote.destroy()  if remote
+
+      connection.on "close", (had_error)->
+        util.log "connection on close:#{had_error}"
+        if had_error
+          remote.destroy() if remote
+        else
+          remote.end() if remote
+        clean()
     
       connection.on "drain", ->
         remote.resume()  if remote
     
       connection.setTimeout timeout, ->
         remote.destroy()  if remote
-        connection.destroy()
+        connection.destroy() if connection
     )
     servers = SERVER
     unless servers instanceof Array

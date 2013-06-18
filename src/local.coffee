@@ -23,7 +23,7 @@ net = require("net")
 fs = require("fs")
 path = require("path")
 util = require('util')
-args = require('./args')
+utils = require('./utils')
 inet = require('./inet')
 Encryptor = require("./encrypt").Encryptor
 
@@ -60,7 +60,13 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
     remoteAddr = null
     remotePort = null
     addrToSend = ""
+    clean = ->
+      remote = null
+      connection = null
+      encryptor = null
+
     connection.on "data", (data) ->
+      utils.debug "connection on data"
       if stage is 5
         # pipe sockets
         data = encryptor.encrypt data
@@ -84,15 +90,15 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           cmd = data[1]
           addrtype = data[3]
           unless cmd is 1
-            util.log "unsupported cmd: " + cmd
+            utils.error "unsupported cmd: " + cmd
             reply = new Buffer("\u0005\u0007\u0000\u0001", "binary")
             connection.end reply
             return
           if addrtype is 3
             addrLen = data[4]
           else unless addrtype in [1, 4]
-            util.log "unsupported addrtype: " + addrtype
-            connection.end()
+            utils.error "unsupported addrtype: " + addrtype
+            connection.destroy()
             return
           addrToSend = data.slice(3, 4).toString("binary")
           # read address and port
@@ -120,7 +126,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           # connect remote server
           aServer = getServer()
           remote = net.connect(serverPort, aServer, ->
-            util.log "connecting #{remoteAddr}:#{remotePort}"
+            utils.info "connecting #{remoteAddr}:#{remotePort}"
             addrToSendBuf = new Buffer(addrToSend, "binary")
             addrToSendBuf = encryptor.encrypt addrToSendBuf
             remote.write addrToSendBuf
@@ -135,28 +141,36 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
             stage = 5
           )
           remote.on "data", (data) ->
+            utils.debug "remote on data"
             try
               data = encryptor.decrypt data
               remote.pause()  unless connection.write(data)
             catch e
-              remote.emit "error", e
+              utils.error e
+              remote.destroy()
+              connection.destroy()
   
           remote.on "end", ->
-            connection.end()
+            util.log "remote on end"
+            connection.end() if connection
   
           remote.on "error", (e)->
+            util.log "remote on error"
             util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
-            if stage is 4
-              connection.destroy()
-              return
-            connection.end()
+
+          remote.on "close", (had_error)->
+            util.log "remote on close:#{had_error}"
+            if had_error
+              connection.destroy() if connection
+            else
+              connection.end() if connection
   
           remote.on "drain", ->
             connection.resume()
   
           remote.setTimeout timeout, ->
-            connection.end()
             remote.destroy()
+            connection.destroy()
   
           if data.length > headerLength
             buf = new Buffer(data.length - headerLength)
@@ -167,27 +181,36 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
         catch e
           # may encounter index out of range
           util.log e
-          connection.destroy()
-          remote.destroy()  if remote
+          connection.destroy() if connection
+          remote.destroy() if remote
       else cachedPieces.push data  if stage is 4
         # remote server not connected
         # cache received buffers
         # make sure no data is lost
   
     connection.on "end", ->
-      remote.destroy()  if remote
+      util.log "connection on end"
+      remote.end()  if remote
   
     connection.on "error", (e)->
+      util.log "connection on error"
       util.log "local error: #{e}"
-      remote.destroy()  if remote
+
+    connection.on "close", (had_error)->
+      util.log "connection on close:#{had_error}"
+      if had_error
+        remote.destroy() if remote
+      else
+        remote.end() if remote
+      clean()
   
     connection.on "drain", ->
       # calling resume() when remote not is connected will crash node.js
-      remote.resume()  if remote and stage is 5
+      remote.resume() if remote and stage is 5
   
     connection.setTimeout timeout, ->
-      remote.destroy()  if remote
-      connection.destroy()
+      remote.destroy() if remote
+      connection.destroy() if connection
   )
   server.listen port, ->
     util.log "server listening at port " + port
@@ -199,10 +222,10 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
   
   
 if require.main is module
-  console.log(args.version)
+  console.log(utils.version)
   configContent = fs.readFileSync(path.resolve(__dirname, "config.json"))
   config = JSON.parse(configContent)
-  configFromArgs = args.parseArgs()
+  configFromArgs = utils.parseArgs()
   for k, v of configFromArgs
     config[k] = v
   SERVER = config.server
