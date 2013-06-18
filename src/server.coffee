@@ -99,8 +99,8 @@ for port, key of portPassword
           data = encryptor.decrypt data
         catch e
           utils.error e
-          remote.destroy()
-          connection.destroy()
+          remote.destroy() if remote
+          connection.destroy() if connection
           return
         if stage is 5
           connection.pause()  unless remote.write(data)
@@ -141,6 +141,9 @@ for port, key of portPassword
             )
             remote.on "data", (data) ->
               utils.log utils.EVERYTHING, "remote on data"
+              if not encryptor
+                remote.destroy() if remote
+              return
               data = encryptor.encrypt data
               remote.pause()  unless connection.write(data)
     

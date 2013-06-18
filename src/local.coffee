@@ -130,6 +130,9 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           aServer = getServer()
           remote = net.connect(serverPort, aServer, ->
             utils.info "connecting #{remoteAddr}:#{remotePort}"
+            if not encryptor
+              remote.destroy() if remote
+              return
             addrToSendBuf = new Buffer(addrToSend, "binary")
             addrToSendBuf = encryptor.encrypt addrToSendBuf
             remote.write addrToSendBuf
@@ -150,8 +153,8 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
               remote.pause()  unless connection.write(data)
             catch e
               utils.error e
-              remote.destroy()
-              connection.destroy()
+              remote.destroy() if remote
+              connection.destroy() if connection
   
           remote.on "end", ->
             utils.debug "remote on end"

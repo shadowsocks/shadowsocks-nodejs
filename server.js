@@ -111,8 +111,12 @@
         } catch (_error) {
           e = _error;
           utils.error(e);
-          remote.destroy();
-          connection.destroy();
+          if (remote) {
+            remote.destroy();
+          }
+          if (connection) {
+            connection.destroy();
+          }
           return;
         }
         if (stage === 5) {
@@ -159,6 +163,12 @@
             });
             remote.on("data", function(data) {
               utils.log(utils.EVERYTHING, "remote on data");
+              if (!encryptor) {
+                if (remote) {
+                  remote.destroy();
+                }
+              }
+              return;
               data = encryptor.encrypt(data);
               if (!connection.write(data)) {
                 return remote.pause();

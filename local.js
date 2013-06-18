@@ -128,6 +128,12 @@
               var addrToSendBuf, i, piece;
 
               utils.info("connecting " + remoteAddr + ":" + remotePort);
+              if (!encryptor) {
+                if (remote) {
+                  remote.destroy();
+                }
+                return;
+              }
               addrToSendBuf = new Buffer(addrToSend, "binary");
               addrToSendBuf = encryptor.encrypt(addrToSendBuf);
               remote.write(addrToSendBuf);
@@ -153,8 +159,12 @@
               } catch (_error) {
                 e = _error;
                 utils.error(e);
-                remote.destroy();
-                return connection.destroy();
+                if (remote) {
+                  remote.destroy();
+                }
+                if (connection) {
+                  return connection.destroy();
+                }
               }
             });
             remote.on("end", function() {
