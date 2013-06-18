@@ -22,7 +22,6 @@
 net = require("net")
 fs = require("fs")
 path = require("path")
-util = require('util')
 utils = require('./utils')
 inet = require('./inet')
 Encryptor = require("./encrypt").Encryptor
@@ -51,6 +50,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
       serverAddr
      
   server = net.createServer((connection) ->
+    connections += 1
     encryptor = new Encryptor(key, method)
     stage = 0
     headerLength = 0
@@ -60,13 +60,16 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
     remoteAddr = null
     remotePort = null
     addrToSend = ""
+    utils.debug "connections: #{connections}"
     clean = ->
+      utils.debug "clean"
+      connections -= 1
       remote = null
       connection = null
       encryptor = null
 
     connection.on "data", (data) ->
-      utils.debug "connection on data"
+      utils.log utils.EVERYTHING, "connection on data"
       if stage is 5
         # pipe sockets
         data = encryptor.encrypt data
@@ -141,7 +144,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
             stage = 5
           )
           remote.on "data", (data) ->
-            utils.debug "remote on data"
+            utils.log utils.EVERYTHING, "remote on data"
             try
               data = encryptor.decrypt data
               remote.pause()  unless connection.write(data)
@@ -151,24 +154,26 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
               connection.destroy()
   
           remote.on "end", ->
-            util.log "remote on end"
+            utils.debug "remote on end"
             connection.end() if connection
   
           remote.on "error", (e)->
-            util.log "remote on error"
-            util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
+            utils.debug "remote on error"
+            utils.error "remote #{remoteAddr}:#{remotePort} error: #{e}"
 
           remote.on "close", (had_error)->
-            util.log "remote on close:#{had_error}"
+            utils.debug "remote on close:#{had_error}"
             if had_error
               connection.destroy() if connection
             else
               connection.end() if connection
   
           remote.on "drain", ->
+            utils.debug "remote on drain"
             connection.resume()
   
           remote.setTimeout timeout, ->
+            utils.debug "remote on timeout"
             remote.destroy()
             connection.destroy()
   
@@ -180,7 +185,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           stage = 4
         catch e
           # may encounter index out of range
-          util.log e
+          utils.error e
           connection.destroy() if connection
           remote.destroy() if remote
       else cachedPieces.push data  if stage is 4
@@ -189,15 +194,15 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
         # make sure no data is lost
   
     connection.on "end", ->
-      util.log "connection on end"
+      utils.debug "connection on end"
       remote.end()  if remote
   
     connection.on "error", (e)->
-      util.log "connection on error"
-      util.log "local error: #{e}"
+      utils.debug "connection on error"
+      utils.error "local error: #{e}"
 
     connection.on "close", (had_error)->
-      util.log "connection on close:#{had_error}"
+      utils.debug "connection on close:#{had_error}"
       if had_error
         remote.destroy() if remote
       else
@@ -206,17 +211,19 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
   
     connection.on "drain", ->
       # calling resume() when remote not is connected will crash node.js
+      utils.debug "connection on drain"
       remote.resume() if remote and stage is 5
   
     connection.setTimeout timeout, ->
+      utils.debug "connection on timeout"
       remote.destroy() if remote
       connection.destroy() if connection
   )
   server.listen port, ->
-    util.log "server listening at port " + port
+    utils.info "server listening at port " + port
   
   server.on "error", (e) ->
-    util.log "Address in use, aborting"  if e.code is "EADDRINUSE"
+    utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
     
   return server
   
@@ -228,12 +235,15 @@ if require.main is module
   configFromArgs = utils.parseArgs()
   for k, v of configFromArgs
     config[k] = v
+  if config.verbose
+    utils.config(utils.DEBUG)
   SERVER = config.server
   REMOTE_PORT = config.server_port
   PORT = config.local_port
   KEY = config.password
   METHOD = config.method
   timeout = Math.floor(config.timeout * 1000)
+  connections = 0
   createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
 else
   exports.createServer = createServer

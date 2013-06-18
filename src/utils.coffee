@@ -20,14 +20,17 @@ exports.parseArgs = ->
     else if oneArg of defination
       lastKey = defination[oneArg]
       nextIsValue = true
+    else if '-v' == oneArg
+      result['verbose'] = true
   result
 
 exports.version = "shadowsocks-nodejs v1.2.2"
 
-exports.DEBUG = 0
-exports.INFO = 1
-exports.WARN = 2
-exports.ERROR = 3
+exports.EVERYTHING = 0
+exports.DEBUG = 1
+exports.INFO = 2
+exports.WARN = 3
+exports.ERROR = 4
 
 _logging_level = exports.INFO
 

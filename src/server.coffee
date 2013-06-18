@@ -21,7 +21,6 @@
 net = require("net")
 fs = require("fs")
 path = require("path")
-util = require('util')
 utils = require("./utils")
 inet = require("./inet")
 Encryptor = require("./encrypt").Encryptor
@@ -49,6 +48,8 @@ configContent = fs.readFileSync(configFile)
 config = JSON.parse(configContent)
 for k, v of configFromArgs
   config[k] = v
+if config.verbose
+  utils.config(utils.DEBUG)
 timeout = Math.floor(config.timeout * 1000)
 portPassword = config.port_password
 port = config.server_port
@@ -56,9 +57,11 @@ key = config.password
 METHOD = config.method
 SERVER = config.server
 
+connections = 0
+
 if portPassword 
   if port or key
-    util.log 'warning: port_password should not be used with server_port and password. server_port and password will be ignored'
+    utils.warn 'warning: port_password should not be used with server_port and password. server_port and password will be ignored'
 else
   portPassword = {}
   portPassword[port.toString()] = key
@@ -72,6 +75,7 @@ for port, key of portPassword
 #    util.log "calculating ciphers for port #{PORT}"
     
     server = net.createServer((connection) ->
+      connections += 1
       encryptor = new Encryptor(KEY, METHOD)
       stage = 0
       headerLength = 0
@@ -80,13 +84,17 @@ for port, key of portPassword
       addrLen = 0
       remoteAddr = null
       remotePort = null
+      utils.debug "connections: #{connections}"
       
       clean = ->
+        utils.debug "clean"
+        connections -= 1
         remote = null
         connection = null
         encryptor = null
 
       connection.on "data", (data) ->
+        utils.log utils.EVERYTHING, "connection on data"
         try
           data = encryptor.decrypt data
         catch e
@@ -103,7 +111,7 @@ for port, key of portPassword
             if addrtype is 3
               addrLen = data[1]
             else unless addrtype in [1, 4]
-              util.log "unsupported addrtype: " + addrtype
+              utils.error "unsupported addrtype: " + addrtype
               connection.destroy()
               return
             # read address and port
@@ -121,7 +129,7 @@ for port, key of portPassword
               headerLength = 2 + addrLen + 2
             # connect remote server
             remote = net.connect(remotePort, remoteAddr, ->
-              util.log "connecting #{remoteAddr}:#{remotePort}"
+              utils.info "connecting #{remoteAddr}:#{remotePort}"
               i = 0
     
               while i < cachedPieces.length
@@ -132,25 +140,31 @@ for port, key of portPassword
               stage = 5
             )
             remote.on "data", (data) ->
+              utils.log utils.EVERYTHING, "remote on data"
               data = encryptor.encrypt data
               remote.pause()  unless connection.write(data)
     
             remote.on "end", ->
+              utils.debug "remote on end"
               connection.end() if connection
     
             remote.on "error", (e)->
-              util.log "remote #{remoteAddr}:#{remotePort} error: #{e}"
+              utils.debug "remote on error"
+              utils.error "remote #{remoteAddr}:#{remotePort} error: #{e}"
  
             remote.on "close", (had_error)->
+              utils.debug "remote on close:#{had_error}"
               if had_error
                 connection.destroy() if connection
               else
                 connection.end() if connection
     
             remote.on "drain", ->
+              utils.debug "remote on drain"
               connection.resume()
     
             remote.setTimeout timeout, ->
+              utils.debug "remote on timeout"
               remote.destroy()
               connection.destroy()
     
@@ -172,13 +186,15 @@ for port, key of portPassword
           # make sure no data is lost
     
       connection.on "end", ->
+        utils.debug "connection on end"
         remote.end()  if remote
      
       connection.on "error", (e)->
-        util.log "local error: #{e}"
+        utils.debug "connection on error"
+        utils.error "local error: #{e}"
 
       connection.on "close", (had_error)->
-        util.log "connection on close:#{had_error}"
+        utils.debug "connection on close:#{had_error}"
         if had_error
           remote.destroy() if remote
         else
@@ -186,9 +202,11 @@ for port, key of portPassword
         clean()
     
       connection.on "drain", ->
+        utils.debug "connection on drain"
         remote.resume()  if remote
     
       connection.setTimeout timeout, ->
+        utils.debug "connection on timeout"
         remote.destroy()  if remote
         connection.destroy() if connection
     )
@@ -197,10 +215,10 @@ for port, key of portPassword
       servers = [servers]
     for server_ip in servers
       server.listen PORT, server_ip, ->
-        util.log "server listening at #{server_ip}:#{PORT} "
+        utils.info "server listening at #{server_ip}:#{PORT} "
     
     server.on "error", (e) ->
-      util.log "Address in use, aborting"  if e.code is "EADDRINUSE"
+      utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
       process.exit 1
   )()
 
