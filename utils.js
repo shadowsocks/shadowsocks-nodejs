@@ -33,7 +33,7 @@
     return result;
   };
 
-  exports.version = "shadowsocks-nodejs v1.2.3";
+  exports.version = "shadowsocks-nodejs v1.2.4";
 
   exports.EVERYTHING = 0;
 
