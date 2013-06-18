@@ -92,6 +92,7 @@ for port, key of portPassword
         remote = null
         connection = null
         encryptor = null
+        utils.debug "connections: #{connections}"
 
       connection.on "data", (data) ->
         utils.log utils.EVERYTHING, "connection on data"

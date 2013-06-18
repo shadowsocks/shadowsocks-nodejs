@@ -67,6 +67,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
       remote = null
       connection = null
       encryptor = null
+      utils.debug "connections: #{connections}"
 
     connection.on "data", (data) ->
       utils.log utils.EVERYTHING, "connection on data"

@@ -100,7 +100,8 @@
         connections -= 1;
         remote = null;
         connection = null;
-        return encryptor = null;
+        encryptor = null;
+        return utils.debug("connections: " + connections);
       };
       connection.on("data", function(data) {
         var addrtype, buf, e;
