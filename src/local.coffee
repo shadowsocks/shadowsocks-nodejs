@@ -180,8 +180,8 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
   
           remote.setTimeout timeout, ->
             utils.debug "remote on timeout"
-            remote.destroy()
-            connection.destroy()
+            remote.destroy() if remote
+            connection.destroy() if connection
   
           if data.length > headerLength
             buf = new Buffer(data.length - headerLength)
@@ -251,6 +251,9 @@ if require.main is module
   METHOD = config.method
   timeout = Math.floor(config.timeout * 1000)
   connections = 0
-  createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
+  s = createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
+  s.on "error", (e) ->
+    utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
+    process.exit 1
 else
   exports.createServer = createServer

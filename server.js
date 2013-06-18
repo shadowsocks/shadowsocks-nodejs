@@ -205,8 +205,12 @@
             });
             remote.setTimeout(timeout, function() {
               utils.debug("remote on timeout");
-              remote.destroy();
-              return connection.destroy();
+              if (remote) {
+                remote.destroy();
+              }
+              if (connection) {
+                return connection.destroy();
+              }
             });
             if (data.length > headerLength) {
               buf = new Buffer(data.length - headerLength);

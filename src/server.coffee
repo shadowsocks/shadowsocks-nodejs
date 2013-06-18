@@ -173,8 +173,8 @@ for port, key of portPassword
     
             remote.setTimeout timeout, ->
               utils.debug "remote on timeout"
-              remote.destroy()
-              connection.destroy()
+              remote.destroy() if remote
+              connection.destroy() if connection
     
             if data.length > headerLength
               # make sure no data is lost
