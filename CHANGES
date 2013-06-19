@@ -48,6 +48,8 @@
 
 0.3 2012-06-26
 - Convert to coffee
+- Move config into a separate file
+- Change default timeout
 
 0.2 2012-06-06
 - Move socks5 negotiation to local
