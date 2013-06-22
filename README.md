@@ -20,7 +20,7 @@ Node source code from Github! It's not stable.
 
 Run
     
-    npm install shadowsocks
+    npm install -g shadowsocks
 
 Create a file named `config.json`, with the following content.
 
