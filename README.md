@@ -25,10 +25,10 @@ Run
 Create a file named `config.json`, with the following content.
 
     {
-        "server":"127.0.0.1",
+        "server":"my_server_ip",
         "server_port":8388,
         "local_port":1080,
-        "password":"barfo!",
+        "password":"barfoo!",
         "timeout":600,
         "method":null
     }
