@@ -16,8 +16,8 @@ while i < 256
 # test proxy
 
 child_process = require('child_process')
-local = child_process.spawn('node', ['local.js'])
-server = child_process.spawn('node', ['server.js'])
+local = child_process.spawn('bin/sslocal', [])
+server = child_process.spawn('bin/ssserver', [])
 
 curlRunning = false
 

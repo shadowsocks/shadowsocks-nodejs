@@ -24,7 +24,7 @@ exports.parseArgs = ->
       result['verbose'] = true
   result
 
-exports.version = "shadowsocks-nodejs v1.2.4"
+exports.version = "shadowsocks-nodejs v1.3.0"
 
 exports.EVERYTHING = 0
 exports.DEBUG = 1

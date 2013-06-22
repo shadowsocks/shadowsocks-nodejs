@@ -41,6 +41,8 @@ inetAton = (ipStr) ->
       i++
     buf
 
+connections = 0
+
 createServer = (serverAddr, serverPort, port, key, method, timeout)->
   
   getServer = ->
@@ -233,13 +235,27 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
     utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
     
   return server
-  
-  
-if require.main is module
+
+exports.createServer = createServer
+exports.main = ->  
   console.log(utils.version)
-  configContent = fs.readFileSync(path.resolve(__dirname, "config.json"))
-  config = JSON.parse(configContent)
   configFromArgs = utils.parseArgs()
+  configPath = 'config.json'
+  for k, v of configFromArgs
+    if k == '-c'
+      configPath = v
+  if not fs.existsSync(configPath)
+    configPath = path.resolve(__dirname, "config.json")
+    if not fs.existsSync(configPath)
+      configPath = path.resolve(__dirname, "../../config.json")
+      if not fs.existsSync(configPath)
+        configPath = null
+  if configPath
+    utils.info 'loading config from ' + configPath
+    configContent = fs.readFileSync(configPath)
+    config = JSON.parse(configContent)
+  else
+    config = {}
   for k, v of configFromArgs
     config[k] = v
   if config.verbose
@@ -249,11 +265,10 @@ if require.main is module
   PORT = config.local_port
   KEY = config.password
   METHOD = config.method
-  timeout = Math.floor(config.timeout * 1000)
-  connections = 0
+  if not (SERVER and REMOTE_PORT and PORT and KEY)
+    utils.warn 'config.json not found, you have to specify all config in commandline'
+    process.exit 1
+  timeout = Math.floor(config.timeout * 1000) or 600
   s = createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
   s.on "error", (e) ->
-    utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
     process.exit 1
-else
-  exports.createServer = createServer
