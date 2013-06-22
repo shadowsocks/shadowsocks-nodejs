@@ -75,3 +75,9 @@ You can build coffee source code and test it:
 License
 -----------------
 MIT
+
+Bugs and Issues
+----------------
+Please visit [issue tracker](https://github.com/clowwindy/shadowsocks-nodejs/issues?state=open)
+
+Mailing list: http://groups.google.com/group/shadowsocks
