@@ -81,3 +81,5 @@ Bugs and Issues
 Please visit [issue tracker](https://github.com/clowwindy/shadowsocks-nodejs/issues?state=open)
 
 Mailing list: http://groups.google.com/group/shadowsocks
+
+Also see [troubleshooting](https://github.com/clowwindy/shadowsocks/wiki/Troubleshooting)
