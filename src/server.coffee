@@ -129,6 +129,8 @@ exports.main = ->
           if stage is 0
             try
               addrtype = data[0]
+              if addrtype is undefined
+                return
               if addrtype is 3
                 addrLen = data[1]
               else unless addrtype in [1, 4]
