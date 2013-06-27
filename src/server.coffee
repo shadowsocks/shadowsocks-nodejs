@@ -47,7 +47,7 @@ exports.main = ->
   configFromArgs = utils.parseArgs()
   configPath = 'config.json'
   for k, v of configFromArgs
-    if k == '-c'
+    if k == 'config_file'
       configPath = v
   if not fs.existsSync(configPath)
     configPath = path.resolve(__dirname, "config.json")
