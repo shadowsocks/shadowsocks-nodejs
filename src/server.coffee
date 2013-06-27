@@ -65,7 +65,7 @@ exports.main = ->
   if config.verbose
     utils.config(utils.DEBUG)
 
-  timeout = Math.floor(config.timeout * 1000) or 600
+  timeout = Math.floor(config.timeout * 1000) or 600000
   portPassword = config.port_password
   port = config.server_port
   key = config.password

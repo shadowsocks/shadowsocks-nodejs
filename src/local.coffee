@@ -154,8 +154,11 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           remote.on "data", (data) ->
             utils.log utils.EVERYTHING, "remote on data"
             try
-              data = encryptor.decrypt data
-              remote.pause()  unless connection.write(data)
+              if encryptor
+                data = encryptor.decrypt data
+                remote.pause()  unless connection.write(data)
+              else
+                remote.destory()
             catch e
               utils.error e
               remote.destroy() if remote
@@ -267,7 +270,7 @@ exports.main = ->
   if not (SERVER and REMOTE_PORT and PORT and KEY)
     utils.warn 'config.json not found, you have to specify all config in commandline'
     process.exit 1
-  timeout = Math.floor(config.timeout * 1000) or 600
+  timeout = Math.floor(config.timeout * 1000) or 600000
   s = createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
   s.on "error", (e) ->
     process.exit 1
