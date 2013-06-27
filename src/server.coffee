@@ -91,7 +91,7 @@ exports.main = ->
       # let's use enclosures to seperate scopes of different servers
       PORT = port
       KEY = key
-  #    util.log "calculating ciphers for port #{PORT}"
+      utils.info "calculating ciphers for port #{PORT}"
       
       server = net.createServer((connection) ->
         connections += 1
@@ -207,7 +207,7 @@ exports.main = ->
               utils.debug "stage = 4"
             catch e
               # may encouter index out of range
-              util.log e
+              utils.error e
               connection.destroy()
               remote.destroy()  if remote
           else cachedPieces.push data  if stage is 4
