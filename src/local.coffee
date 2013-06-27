@@ -241,9 +241,8 @@ exports.main = ->
   console.log(utils.version)
   configFromArgs = utils.parseArgs()
   configPath = 'config.json'
-  for k, v of configFromArgs
-    if k == 'config_file'
-      configPath = v
+  if configFromArgs.config_file
+    configPath = configFromArgs.config_file
   if not fs.existsSync(configPath)
     configPath = path.resolve(__dirname, "config.json")
     if not fs.existsSync(configPath)
