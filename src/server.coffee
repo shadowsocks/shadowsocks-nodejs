@@ -248,7 +248,10 @@ exports.main = ->
           utils.info "server listening at #{server_ip}:#{PORT} "
       
       server.on "error", (e) ->
-        utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
+        if e.code is "EADDRINUSE"
+          utils.error "Address in use, aborting"
+        else
+          utils.error e
         process.stdout.on 'drain', ->
           process.exit 1
     )()
