@@ -249,6 +249,7 @@ exports.main = ->
       
       server.on "error", (e) ->
         utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
-        process.exit 1
+        process.stdout.on 'drain', ->
+          process.exit 1
     )()
 

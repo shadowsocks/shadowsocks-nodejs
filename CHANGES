@@ -1,3 +1,6 @@
+1.3.4 2013-06-29
+- Flush logs when exit with error
+
 1.3.3 2013-06-27
 - Fix util not found
 

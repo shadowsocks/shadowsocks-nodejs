@@ -235,7 +235,10 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
     utils.info "server listening at port " + port
   
   server.on "error", (e) ->
-    utils.error "Address in use, aborting"  if e.code is "EADDRINUSE"
+    if e.code is "EADDRINUSE"
+      utils.error "Address in use, aborting"
+    else
+      utils.error e
     
   return server
 
@@ -273,4 +276,5 @@ exports.main = ->
   timeout = Math.floor(config.timeout * 1000) or 600000
   s = createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
   s.on "error", (e) ->
-    process.exit 1
+    process.stdout.on 'drain', ->
+      process.exit 1
