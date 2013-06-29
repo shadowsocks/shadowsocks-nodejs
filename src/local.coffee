@@ -278,3 +278,5 @@ exports.main = ->
   s.on "error", (e) ->
     process.stdout.on 'drain', ->
       process.exit 1
+if require.main is module
+  exports.main()

@@ -1,3 +1,6 @@
+1.3.5 2013-06-29
+- Make local.js and server.js runnable
+
 1.3.4 2013-06-29
 - Flush logs when exit with error
 

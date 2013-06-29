@@ -256,3 +256,5 @@ exports.main = ->
           process.exit 1
     )()
 
+if require.main is module 
+  exports.main()
