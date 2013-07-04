@@ -265,6 +265,9 @@ exports.main = ->
     config[k] = v
   if config.verbose
     utils.config(utils.DEBUG)
+
+  utils.checkConfig config
+  
   SERVER = config.server
   REMOTE_PORT = config.server_port
   PORT = config.local_port

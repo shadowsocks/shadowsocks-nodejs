@@ -64,6 +64,8 @@ exports.main = ->
     config[k] = v
   if config.verbose
     utils.config(utils.DEBUG)
+    
+  utils.checkConfig config
 
   timeout = Math.floor(config.timeout * 1000) or 600000
   portPassword = config.port_password

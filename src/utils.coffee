@@ -24,7 +24,14 @@ exports.parseArgs = ->
       result['verbose'] = true
   result
 
-exports.version = "shadowsocks-nodejs v1.3.5"
+exports.checkConfig = (config) ->
+  if config.server in ['127.0.0.1', 'localhost']
+    exports.warn "Server is set to #{config.server}, maybe it's not correct"
+    exports.warn "Notice server will listen at #{config.server}:#{config.server_port}"
+  if (config.method or '').toLowerCase() == 'rc4'
+    exports.warn 'RC4 is not safe; please use a safer cipher, like AES-256-CFB'
+
+exports.version = "shadowsocks-nodejs v1.3.6"
 
 exports.EVERYTHING = 0
 exports.DEBUG = 1
