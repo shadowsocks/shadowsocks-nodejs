@@ -59,3 +59,9 @@ exports.warn = (msg)->
   
 exports.error = (msg)->
   exports.log exports.ERROR, msg
+
+setInterval(->
+  if global.gc
+    exports.debug 'GC'
+    gc()
+, 1000)
