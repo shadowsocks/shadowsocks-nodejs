@@ -64,4 +64,4 @@ setInterval(->
   if global.gc
     exports.debug 'GC'
     gc()
-, 1000)
+, 30000)
