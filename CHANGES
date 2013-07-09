@@ -1,3 +1,7 @@
+1.3.7 2013-07-09
+- Fix default key length of rc2
+- Call gc() every 30s if --expose-gc is supplied to node args
+
 1.3.6 2013-07-04
 - Check config and show some warning messages
 
