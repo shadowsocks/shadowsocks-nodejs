@@ -14,7 +14,7 @@
     "directories": {
         "lib": "./lib/shadowsocks"
     },
-    "main": "./lib/shadowsocks/server",
+    "main": "./lib/shadowsocks/local",
     "bin": {
         "sslocal": "./bin/sslocal",
         "ssserver": "./bin/ssserver"
