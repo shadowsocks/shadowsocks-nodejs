@@ -50,23 +50,30 @@ class LRUCache
 # | 2  |  1   |  1   | Variable |    2     | Variable |
 # +----+------+------+----------+----------+----------+
 
-exports.createServer = (listenAddr, listenPort, serverAddr, serverPort, 
+# how to name variables
+# dest means destination server, which is from DST fields in the SOCKS5 request
+# local means local server of shadowsocks
+# remote means remote server of shadowsocks
+# client means UDP client, which is used for connecting
+# server means UDP server, which is used for listening
+
+exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort, 
                         key, method, timeout, isLocal) ->
-  udpTypes = []
+  udpTypesToListen = []
   if listenAddr == null
-    udpTypes = ['udp4', 'udp6']
+    udpTypesToListen = ['udp4', 'udp6']
   else
     listenIPType = net.isIP(listenAddr)
     if listenIPType == 6
-      udpTypes.push 'udp6'
+      udpTypesToListen.push 'udp6'
     else
-      udpTypes.push 'udp4'
-  for udpType in udpTypes
-    server = dgram.createSocket(udpType)
+      udpTypesToListen.push 'udp4'
+  for udpTypeToListen in udpTypesToListen
+    server = dgram.createSocket(udpTypeToListen)
     clients = new LRUCache(timeout, 10 * 1000)
     
-    clientKey = (localAddr, localPort, remoteAddr, remotePort) ->
-      return "#{localAddr}:#{localPort}:#{remoteAddr}:#{remotePort}"
+    clientKey = (localAddr, localPort, destAddr, destPort) ->
+      return "#{localAddr}:#{localPort}:#{destAddr}:#{destPort}"
   
     server.on("message", (data, rinfo) ->
       console.error("server got: " + data + " from " + rinfo.address + ":" + rinfo.port)
@@ -84,23 +91,23 @@ exports.createServer = (listenAddr, listenPort, serverAddr, serverPort,
         return
       # read address and port
       if addrtype is 1
-        remoteAddr = inetNtoa(data.slice(4, 8))
-        remotePort = data.readUInt16BE(8)
+        destAddr = inetNtoa(data.slice(4, 8))
+        destPort = data.readUInt16BE(8)
         headerLength = 10
       else if addrtype is 4
-        remoteAddr = inet.inet_ntop(data.slice(4, 20))
-        remotePort = data.readUInt16BE(20)
+        destAddr = inet.inet_ntop(data.slice(4, 20))
+        destPort = data.readUInt16BE(20)
         headerLength = 22
       else
-        remoteAddr = data.slice(5, 5 + addrLen).toString("binary")
-        remotePort = data.readUInt16BE(5 + addrLen)
+        destAddr = data.slice(5, 5 + addrLen).toString("binary")
+        destAddr = data.readUInt16BE(5 + addrLen)
         headerLength = 5 + addrLen + 2
-      utils.debug "UDP send to #{remoteAddr}:#{remotePort}"
+      utils.debug "UDP send to #{destAddr}:#{destPort}"
       
-      key = clientKey(rinfo.address, rinfo.port, remoteAddr, remotePort)
+      key = clientKey(rinfo.address, rinfo.port, destAddr, destPort)
       client = clients.getItem(key)
       if not client?
-        ipType = net.isIP(remoteAddr)
+        ipType = net.isIP(destAddr)
         if ipType == 6
           client = dgram.createSocket("udp6")
         else
@@ -122,7 +129,7 @@ exports.createServer = (listenAddr, listenPort, serverAddr, serverPort,
   
       utils.debug "pairs: #{Object.keys(clients.dict).length}"
   
-      client.send data, headerLength, data.length - headerLength, remotePort, remoteAddr, (err, bytes) ->
+      client.send data, headerLength, data.length - headerLength, destPort, destAddr, (err, bytes) ->
         utils.debug "client to remote sent"
   
     )
@@ -132,8 +139,8 @@ exports.createServer = (listenAddr, listenPort, serverAddr, serverPort,
       console.error("server listening " + address.address + ":" + address.port)
     ) 
     
-    if serverAddr?
-      server.bind(listenPort, serverAddr)
+    if remoteAddr
+      server.bind(listenPort, remoteAddr)
     else
       server.bind(listenPort)
     
