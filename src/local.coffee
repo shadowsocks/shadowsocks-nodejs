@@ -22,6 +22,7 @@
 net = require("net")
 fs = require("fs")
 path = require("path")
+udpRelay = require("./udprelay")
 utils = require('./utils')
 inet = require('./inet')
 Encryptor = require("./encrypt").Encryptor
@@ -44,6 +45,8 @@ inetAton = (ipStr) ->
 connections = 0
 
 createServer = (serverAddr, serverPort, port, key, method, timeout)->
+  
+  udpRelay.createServer(null, port, serverAddr, serverPort, key, method, timeout, true)
   
   getServer = ->
     if serverAddr instanceof Array
@@ -96,7 +99,20 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           #cmd and addrtype
           cmd = data[1]
           addrtype = data[3]
-          unless cmd is 1
+          if cmd is 1
+            # TCP
+          else if cmd is 3
+            # UDP
+            utils.info "UDP assc request from #{connection.localAddress}:#{connection.localPort}"
+            reply = new Buffer(10)
+            reply.write "\u0005\u0000\u0000\u0001", 0, 4, "binary"
+            utils.debug connection.localAddress
+            inetAton(connection.localAddress).copy reply, 4
+            reply.writeUInt16BE connection.localPort, 8
+            connection.write reply
+            stage = 10
+            return
+          else
             utils.error "unsupported cmd: " + cmd
             reply = new Buffer("\u0005\u0007\u0000\u0001", "binary")
             connection.end reply
@@ -232,7 +248,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
       connection.destroy() if connection
   )
   server.listen port, ->
-    utils.info "server listening at port " + port
+    utils.info "local listening at port " + port
   
   server.on "error", (e) ->
     if e.code is "EADDRINUSE"

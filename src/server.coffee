@@ -21,6 +21,7 @@
 net = require("net")
 fs = require("fs")
 path = require("path")
+udpRelay = require("./udprelay")
 utils = require("./utils")
 inet = require("./inet")
 Encryptor = require("./encrypt").Encryptor
@@ -94,7 +95,7 @@ exports.main = ->
       PORT = port
       KEY = key
       utils.info "calculating ciphers for port #{PORT}"
-      
+
       server = net.createServer((connection) ->
         connections += 1
         encryptor = new Encryptor(KEY, METHOD)
@@ -248,7 +249,10 @@ exports.main = ->
       for server_ip in servers
         server.listen PORT, server_ip, ->
           utils.info "server listening at #{server_ip}:#{PORT} "
+        udpRelay.createServer(server_ip, PORT, null, null, key, METHOD, timeout, false)
+        utils.info "udp server created at #{server_ip}:#{PORT} "
       
+       
       server.on "error", (e) ->
         if e.code is "EADDRINUSE"
           utils.error "Address in use, aborting"
