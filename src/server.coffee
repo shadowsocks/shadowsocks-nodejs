@@ -192,7 +192,7 @@ exports.main = ->
       
               remote.on "drain", ->
                 utils.debug "remote on drain"
-                connection.resume()
+                connection.resume() if connection
       
               remote.setTimeout timeout, ->
                 utils.debug "remote on timeout"
