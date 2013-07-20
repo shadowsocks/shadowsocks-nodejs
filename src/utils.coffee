@@ -31,7 +31,7 @@ exports.checkConfig = (config) ->
   if (config.method or '').toLowerCase() == 'rc4'
     exports.warn 'RC4 is not safe; please use a safer cipher, like AES-256-CFB'
 
-exports.version = "shadowsocks-nodejs v1.4"
+exports.version = "shadowsocks-nodejs v1.4.0"
 
 exports.EVERYTHING = 0
 exports.DEBUG = 1
