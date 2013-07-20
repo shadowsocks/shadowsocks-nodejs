@@ -1,4 +1,4 @@
-# Copyright (c) 2012 clowwindy
+# Copyright (c) 2013 clowwindy
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -111,7 +111,6 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
             reply.writeUInt16BE connection.localPort, 8
             connection.write reply
             stage = 10
-            return
           else
             utils.error "unsupported cmd: " + cmd
             reply = new Buffer("\u0005\u0007\u0000\u0001", "binary")
@@ -140,6 +139,9 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
             addrToSend += data.slice(4, 5 + addrLen + 2).toString("binary")
             remotePort = data.readUInt16BE(5 + addrLen)
             headerLength = 5 + addrLen + 2
+          if cmd is 3
+            utils.info "UDP assc: #{remoteAddr}:#{remotePort}"
+            return
           buf = new Buffer(10)
           buf.write "\u0005\u0000\u0000\u0001", 0, 4, "binary"
           buf.write "\u0000\u0000\u0000\u0000", 4, 4, "binary"
