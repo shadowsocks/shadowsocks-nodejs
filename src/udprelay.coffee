@@ -118,7 +118,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
           utils.debug "client got #{data1} from #{rinfo1.address}:#{rinfo1.port}"
           data2 = Buffer.concat([data.slice(0, headerLength), data1])
           server.send data2, 0, data2.length, rinfo.port, rinfo.address, (err, bytes) ->
-            utils.debug "remote to client sent"
+            utils.debug "remote to local sent"
     
         client.on "error", (err) ->
           utils.debug "error: #{err}"
@@ -130,7 +130,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
       utils.debug "pairs: #{Object.keys(clients.dict).length}"
   
       client.send data, headerLength, data.length - headerLength, destPort, destAddr, (err, bytes) ->
-        utils.debug "client to remote sent"
+        utils.debug "local to remote sent"
   
     )
     
