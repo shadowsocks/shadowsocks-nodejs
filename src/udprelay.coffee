@@ -183,8 +183,8 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
       if isLocal
         requestHeaderOffset = 3
         frag = data[2]
-        utils.debug "frag:#{frag}"
         if frag != 0
+          utils.debug "frag:#{frag}"
           utils.warn "drop a message since frag is not 0"
           return
       else
@@ -223,7 +223,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
             # on remote, server to client
             # append shadowsocks response header
             # TODO: support receive from IPv6 addr
-            utils.info "UDP recv from #{rinfo1.address}:#{rinfo1.port}"
+            utils.debug "UDP recv from #{rinfo1.address}:#{rinfo1.port}"
             serverIPBuf = inetAton(rinfo1.address)
             responseHeader = new Buffer(7)
             responseHeader.write('\x01', 0)
@@ -243,7 +243,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
               # drop
               return
             [addrtype, destAddr, destPort, headerLength] = parseHeader(data1, 0)
-            utils.info "UDP recv from #{destAddr}:#{destPort}"
+            utils.debug "UDP recv from #{destAddr}:#{destPort}"
             data2 = Buffer.concat([responseHeader, data1])
           server.send data2, 0, data2.length, rinfo.port, rinfo.address, (err, bytes) ->
             utils.debug "remote to local sent"
@@ -265,7 +265,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
           # drop
           return
 
-      utils.info "UDP send to #{destAddr}:#{destPort}"
+      utils.debug "UDP send to #{destAddr}:#{destPort}"
       client.send dataToSend, 0, dataToSend.length, serverPort, serverAddr, (err, bytes) ->
         utils.debug "local to remote sent"
   
