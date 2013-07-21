@@ -276,8 +276,8 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
       utils.info("UDP server listening " + address.address + ":" + address.port)
     ) 
     
-    if remoteAddr
-      server.bind(listenPort, remoteAddr)
+    if listenAddr?
+      server.bind(listenPort, listenAddr)
     else
       server.bind(listenPort)
     
