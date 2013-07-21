@@ -56,7 +56,7 @@ getTable = (key) ->
   cachedTables[key] = result
   result
   
-encrypt = (table, buf) ->
+substitute = (table, buf) ->
   i = 0
 
   while i < buf.length
@@ -151,7 +151,7 @@ class Encryptor
         @iv_sent = true
         return Buffer.concat([@cipher_iv, result])
     else
-      encrypt @encryptTable, buf
+      substitute @encryptTable, buf
       
   decrypt: (buf) ->
     if @method?
@@ -165,7 +165,39 @@ class Encryptor
         result = to_buffer @decipher.update(buf.toString('binary'))
         return result
     else
-      encrypt @decryptTable, buf
-      
+      substitute @decryptTable, buf
+
+encryptAll = (password, method, op, data) ->
+  if method == 'table'
+    method = null
+  if not method?
+    [encryptTable, decryptTable] = getTable(password)
+    if op is 0
+      return substitute(decryptTable, data)
+    else
+      return substitute(encryptTable, data)
+  else
+    result = []
+    method = method.toLowerCase()
+    [keyLen, ivLen] = method_supported[method]
+    password = Buffer(password, 'binary')
+    [key, iv_] = EVP_BytesToKey(password, keyLen, ivLen) 
+    if op == 1
+      iv = crypto.randomBytes ivLen
+      result.push iv
+    else
+      iv = data.slice 0, ivLen
+      data = data.slice ivLen
+    if op == 1
+      cipher = crypto.createCipheriv(method, key, iv)
+    else
+      cipher = crypto.createDecipheriv(method, key, iv)
+    result.push cipher.update(data)
+    result.push cipher.final()
+    return Buffer.concat result
+
+
 exports.Encryptor = Encryptor
 exports.getTable = getTable
+exports.encryptAll = encryptAll
+

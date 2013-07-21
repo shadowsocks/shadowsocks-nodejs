@@ -20,6 +20,7 @@
 
 utils = require('./utils')
 inet = require('./inet')
+encryptor = require('./encrypt')
 
 inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
@@ -120,8 +121,22 @@ class LRUCache
 # `client` means UDP client, which is used for connecting, or the client that connects our server
 # `server` means UDP server, which is used for listening, or the server for our client to connect
 
+encrypt = (password, method, data) ->
+  try
+    return encryptor.encryptAll(password, method, 1, data)
+  catch e
+    utils.error e
+    return null
+  
+decrypt = (password, method, data) ->
+  try
+    return encryptor.encryptAll(password, method, 0, data)
+  catch e
+    utils.error e
+    return null
+
 exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort, 
-                        key, method, timeout, isLocal) ->
+                        password, method, timeout, isLocal) ->
   # if listen to ANY, listen to both IPv4 and IPv6
   # or listen to IP family of IP address
   udpTypesToListen = []
@@ -141,7 +156,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
       return "#{localAddr}:#{localPort}:#{destAddr}:#{destPort}"
   
     server.on("message", (data, rinfo) ->
-      console.error("server got: " + data + " from " + rinfo.address + ":" + rinfo.port)
+#      console.error("server got: " + data + " from " + rinfo.address + ":" + rinfo.port)
       
       # Parse request
       headerLength = 0
@@ -151,14 +166,20 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
         frag = data[2]
         utils.debug "frag:#{frag}"
         if frag != 0
-          utils.wran "drop a message since frag is not 0"
+          utils.warn "drop a message since frag is not 0"
+          return
+      else
+        # on remote, client to server
+        data = decrypt(password, method, data)
+        if not data?
+          # drop
           return
       addrtype = data[requestHeaderOffset]
       if addrtype is 3
         addrLen = data[requestHeaderOffset + 1]
       else unless addrtype in [1, 4]
-        utils.error "unsupported addrtype: " + addrtype
-        connection.destroy()
+        utils.warn "unsupported addrtype: " + addrtype
+        # drop
         return
       if addrtype is 1
         destAddr = inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
@@ -192,34 +213,51 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
         clients.setItem(key, client)
       
         client.on "message", (data1, rinfo1) ->
-          utils.debug "client got #{data1} from #{rinfo1.address}:#{rinfo1.port}"
+#          utils.debug "client got #{data1} from #{rinfo1.address}:#{rinfo1.port}"
           if not isLocal
+            # on remote, server to client
             # append shadowsocks response header
+            # TODO: support receive from IPv6 addr
             serverIPBuf = inetAton(rinfo1.address)
             responseHeader = new Buffer(7)
             responseHeader.write('\x01', 0)
             serverIPBuf.copy(responseHeader, 1, 0, 4)
             responseHeader.writeUInt16BE(rinfo1.port, 5)
             data2 = Buffer.concat([responseHeader, data1])
+            data2 = encrypt(password, method, data2)
+            if not data2?
+              # drop
+              return
           else
+            # on local, server to client
             # append socks5 response header
             responseHeader = new Buffer("\x00\x00\x00")
+            data1 = decrypt(password, method, data1)
+            if not data1?
+              # drop
+              return
             data2 = Buffer.concat([responseHeader, data1])
           server.send data2, 0, data2.length, rinfo.port, rinfo.address, (err, bytes) ->
             utils.debug "remote to local sent"
     
         client.on "error", (err) ->
-          utils.debug "error: #{err}"
+          utils.error "UDP client error: #{err}"
         
         client.on "close", ->
-          utils.debug "close"
+          utils.debug "UDP client close"
           clients.delItem(key)
   
       utils.debug "pairs: #{Object.keys(clients.dict).length}"
  
       dataToSend = data.slice(sendDataOffset, data.length)
+      if isLocal
+        # on local, client to server
+        dataToSend = encrypt password, method, dataToSend
+        if not dataToSend?
+          # drop
+          return
 
-      utils.debug "UDP send to #{serverAddr}:#{serverPort}"
+      utils.info "UDP send to #{destAddr}:#{destPort}"
       client.send dataToSend, 0, dataToSend.length, serverPort, serverAddr, (err, bytes) ->
         utils.debug "local to remote sent"
   
@@ -227,7 +265,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
     
     server.on("listening", ->
       address = server.address()
-      console.error("server listening " + address.address + ":" + address.port)
+#      console.error("server listening " + address.address + ":" + address.port)
     ) 
     
     if remoteAddr
