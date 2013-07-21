@@ -135,12 +135,34 @@ decrypt = (password, method, data) ->
     utils.error e
     return null
 
+parseHeader = (data, requestHeaderOffset) ->
+  addrtype = data[requestHeaderOffset]
+  if addrtype is 3
+    addrLen = data[requestHeaderOffset + 1]
+  else unless addrtype in [1, 4]
+    utils.warn "unsupported addrtype: " + addrtype
+    return null
+  if addrtype is 1
+    destAddr = inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
+    destPort = data.readUInt16BE(requestHeaderOffset + 5)
+    headerLength = requestHeaderOffset + 7
+  else if addrtype is 4
+    destAddr = inet.inet_ntop(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 17))
+    destPort = data.readUInt16BE(requestHeaderOffset + 17)
+    headerLength = requestHeaderOffset + 19
+  else
+    destAddr = data.slice(requestHeaderOffset + 2, requestHeaderOffset + 2 + addrLen).toString("binary")
+    destPort = data.readUInt16BE(requestHeaderOffset + 2 + addrLen)
+    headerLength = requestHeaderOffset + 2 + addrLen + 2
+  return [addrtype, destAddr, destPort, headerLength]
+ 
+
 exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort, 
                         password, method, timeout, isLocal) ->
   # if listen to ANY, listen to both IPv4 and IPv6
   # or listen to IP family of IP address
   udpTypesToListen = []
-  if listenAddr == null
+  if not listenAddr?
     udpTypesToListen = ['udp4', 'udp6']
   else
     listenIPType = net.isIP(listenAddr)
@@ -156,10 +178,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
       return "#{localAddr}:#{localPort}:#{destAddr}:#{destPort}"
   
     server.on("message", (data, rinfo) ->
-#      console.error("server got: " + data + " from " + rinfo.address + ":" + rinfo.port)
-      
       # Parse request
-      headerLength = 0
       requestHeaderOffset = 0
       if isLocal
         requestHeaderOffset = 3
@@ -174,26 +193,12 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
         if not data?
           # drop
           return
-      addrtype = data[requestHeaderOffset]
-      if addrtype is 3
-        addrLen = data[requestHeaderOffset + 1]
-      else unless addrtype in [1, 4]
-        utils.warn "unsupported addrtype: " + addrtype
+      headerResult = parseHeader(data, requestHeaderOffset)
+      if headerResult == null
         # drop
         return
-      if addrtype is 1
-        destAddr = inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
-        destPort = data.readUInt16BE(requestHeaderOffset + 5)
-        headerLength = requestHeaderOffset + 7
-      else if addrtype is 4
-        destAddr = inet.inet_ntop(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 17))
-        destPort = data.readUInt16BE(requestHeaderOffset + 17)
-        headerLength = requestHeaderOffset + 19
-      else
-        destAddr = data.slice(requestHeaderOffset + 2, requestHeaderOffset + 2 + addrLen).toString("binary")
-        destPort = data.readUInt16BE(requestHeaderOffset + 2 + addrLen)
-        headerLength = requestHeaderOffset + 2 + addrLen + 2
-        
+      [addrtype, destAddr, destPort, headerLength] = headerResult
+       
       if isLocal
         sendDataOffset = requestHeaderOffset
         [serverAddr, serverPort] = [remoteAddr, remotePort]
@@ -218,6 +223,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
             # on remote, server to client
             # append shadowsocks response header
             # TODO: support receive from IPv6 addr
+            utils.info "UDP recv from #{rinfo1.address}:#{rinfo1.port}"
             serverIPBuf = inetAton(rinfo1.address)
             responseHeader = new Buffer(7)
             responseHeader.write('\x01', 0)
@@ -236,6 +242,8 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
             if not data1?
               # drop
               return
+            [addrtype, destAddr, destPort, headerLength] = parseHeader(data1, 0)
+            utils.info "UDP recv from #{destAddr}:#{destPort}"
             data2 = Buffer.concat([responseHeader, data1])
           server.send data2, 0, data2.length, rinfo.port, rinfo.address, (err, bytes) ->
             utils.debug "remote to local sent"
@@ -265,7 +273,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
     
     server.on("listening", ->
       address = server.address()
-#      console.error("server listening " + address.address + ":" + address.port)
+      utils.info("UDP server listening " + address.address + ":" + address.port)
     ) 
     
     if remoteAddr

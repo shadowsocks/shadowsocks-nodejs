@@ -250,8 +250,6 @@ exports.main = ->
         server.listen PORT, server_ip, ->
           utils.info "server listening at #{server_ip}:#{PORT} "
         udpRelay.createServer(server_ip, PORT, null, null, key, METHOD, timeout, false)
-        utils.info "udp server created at #{server_ip}:#{PORT} "
-      
        
       server.on "error", (e) ->
         if e.code is "EADDRINUSE"
