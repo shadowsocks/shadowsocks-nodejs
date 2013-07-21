@@ -74,7 +74,7 @@ class LRUCache
     for k in keys
       v = dict[k]
       diff = process.hrtime(v[1])
-      if diff[0] > @timeout
+      if diff[0] > @timeout * 0.001
         swept += 1
         v0 = v[0]
         v0.close()
