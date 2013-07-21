@@ -46,7 +46,7 @@ connections = 0
 
 createServer = (serverAddr, serverPort, port, key, method, timeout)->
   
-  udpRelay.createServer(null, port, serverAddr, serverPort, key, method, timeout, true)
+  udpServer = udpRelay.createServer(null, port, serverAddr, serverPort, key, method, timeout, true)
   
   getServer = ->
     if serverAddr instanceof Array
@@ -257,6 +257,9 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
       utils.error "Address in use, aborting"
     else
       utils.error e
+
+  server.on "close", ->
+    udpServer.close()
     
   return server
 

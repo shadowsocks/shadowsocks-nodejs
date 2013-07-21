@@ -62,6 +62,9 @@ class LRUCache
   
   delItem: (key) ->
     delete @dict[key]
+
+  destroy: ->
+    clearInterval @interval
   
   sweep: ->
     utils.debug "sweeping"
@@ -271,10 +274,13 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
   
     )
     
-    server.on("listening", ->
+    server.on "listening", ->
       address = server.address()
       utils.info("UDP server listening " + address.address + ":" + address.port)
-    ) 
+
+    server.on "close", ->
+      utils.info "UDP server closing"
+      clients.destroy()
     
     if listenAddr?
       server.bind(listenPort, listenAddr)
