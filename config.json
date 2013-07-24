@@ -4,5 +4,5 @@
     "local_port":1080,
     "password":"barfoo!",
     "timeout":600,
-    "method":"table"
+    "method":"aes-256-cfb"
 }
