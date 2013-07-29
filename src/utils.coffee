@@ -81,6 +81,8 @@ exports.error = (msg)->
 
 setInterval(->
   if global.gc
+    exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
     exports.debug 'GC'
     gc()
+    exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
 , 30000)
