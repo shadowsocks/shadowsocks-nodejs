@@ -176,7 +176,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
                 data = encryptor.decrypt data
                 remote.pause()  unless connection.write(data)
               else
-                remote.destory()
+                remote.destroy()
             catch e
               utils.error e
               remote.destroy() if remote
