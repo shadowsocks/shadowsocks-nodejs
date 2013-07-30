@@ -85,4 +85,13 @@ setInterval(->
     exports.debug 'GC'
     gc()
     exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
+    cwd = process.cwd()
+    if _logging_level == exports.DEBUG
+      try
+        heapdump = require 'heapdump'
+        process.chdir '/tmp'
+        heapdump.writeSnapshot()
+        process.chdir cwd
+      catch e
+        exports.debug e
 , 30000)
