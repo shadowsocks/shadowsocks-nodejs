@@ -145,6 +145,8 @@ class Encryptor
   encrypt: (buf) ->
     if @method?
       result = to_buffer @cipher.update(buf.toString('binary'))
+      if global.gc?
+        gc()
       if @iv_sent
         return result
       else
