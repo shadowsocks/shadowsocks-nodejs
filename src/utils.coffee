@@ -94,4 +94,4 @@ setInterval(->
         process.chdir cwd
       catch e
         exports.debug e
-, 30000)
+, 1000)
