@@ -90,7 +90,7 @@ setInterval(->
       try
         heapdump = require 'heapdump'
         process.chdir '/tmp'
-        heapdump.writeSnapshot()
+#        heapdump.writeSnapshot()
         process.chdir cwd
       catch e
         exports.debug e
