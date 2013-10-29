@@ -1,0 +1,18 @@
+{
+	"server":"127.0.0.1",
+    "server_port":8380,
+    "local_port":1081,
+    "password":"barfoo!",
+    "port_password": {
+        "8380": "barfoo!",
+        "8381": "barfoo!",
+        "8382": "barfoo!",
+        "8383": "barfoo!",
+        "8384": "barfoo!",
+        "8385": "barfoo!",
+        "8386": "barfoo!",
+        "8387": "barfoo!"
+    },
+    "timeout":60,
+    "method":"aes-256-cfb"
+}

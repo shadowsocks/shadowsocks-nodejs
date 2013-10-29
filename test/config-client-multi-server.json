@@ -1,0 +1,8 @@
+{
+	"server": ["123.123.123.1", "123.123.123.2", "123.123.123.3"],
+    "server_port":8380,
+    "local_port":1081,
+    "password":"barfoo!",
+    "timeout":60,
+    "method":"aes-256-cfb"
+}

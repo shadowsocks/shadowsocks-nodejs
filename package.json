@@ -3,7 +3,7 @@
     "description": "a tunnel proxy that help you get through firewalls",
     "keywords": ["shadowsocks", "proxy", "socks5"],
     "author": "clowwindy",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "licenses": [{
         "type": "MIT",
         "url": "https://raw.github.com/clowwindy/shadowsocks-nodejs/master/LICENSE"

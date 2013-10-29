@@ -49,10 +49,21 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
   udpServer = udpRelay.createServer(null, port, serverAddr, serverPort, key, method, timeout, true)
   
   getServer = ->
+    aPort = serverPort
+    aServer = serverAddr
+    if serverPort instanceof Array
+      # support config like "server_port": [8081, 8082]
+      aPort = serverPort[Math.floor(Math.random() * serverPort .length)]
     if serverAddr instanceof Array
-      serverAddr[Math.floor(Math.random() * serverAddr .length)]
-    else
-      serverAddr
+      # support config like "server": ["123.123.123.1", "123.123.123.2"]
+      aServer = serverAddr[Math.floor(Math.random() * serverAddr .length)]
+    r = /^(.*)\:(\d+)$/.exec(aServer)
+    # support config like "server": "123.123.123.1:8381"
+    # or "server": ["123.123.123.1:8381", "123.123.123.2:8381", "123.123.123.2:8382"]
+    if r?
+      aServer = r[1]
+      aPort = +r[2]
+    return [aServer, aPort]
      
   server = net.createServer((connection) ->
     connections += 1
@@ -149,9 +160,9 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
           buf.writeInt16BE 2222, 8
           connection.write buf
           # connect remote server
-          aServer = getServer()
-          remote = net.connect(serverPort, aServer, ->
-            utils.info "connecting #{remoteAddr}:#{remotePort}"
+          [aServer, aPort] = getServer()
+          utils.info "connecting #{aServer}:#{aPort}"
+          remote = net.connect(aPort, aServer, ->
             if not encryptor
               remote.destroy() if remote
               return

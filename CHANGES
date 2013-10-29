@@ -1,3 +1,6 @@
+1.4.2 2013-10-29
+- Client now support multiple server ports and multiple server/port pairs. See test/config-client-*.json for example
+
 1.4.1 2013-07-30
 - Change default cipher to AES-256-CFB in config.json
 - Fix a typo in local
