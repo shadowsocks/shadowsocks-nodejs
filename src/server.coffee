@@ -58,7 +58,11 @@ exports.main = ->
   if configPath
     utils.info 'loading config from ' + configPath
     configContent = fs.readFileSync(configPath)
-    config = JSON.parse(configContent)
+    try
+      config = JSON.parse(configContent)
+    catch e
+      utils.error('found an error in config.json: ' + e.message)
+      process.exit 1
   else
     config = {}
   for k, v of configFromArgs
@@ -136,7 +140,7 @@ exports.main = ->
               if addrtype is 3
                 addrLen = data[1]
               else unless addrtype in [1, 4]
-                utils.error "unsupported addrtype: " + addrtype
+                utils.error "unsupported addrtype: " + addrtype + " maybe wrong password"
                 connection.destroy()
                 return
               # read address and port

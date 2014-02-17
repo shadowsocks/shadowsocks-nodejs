@@ -290,7 +290,11 @@ exports.main = ->
   if configPath
     utils.info 'loading config from ' + configPath
     configContent = fs.readFileSync(configPath)
-    config = JSON.parse(configContent)
+    try
+      config = JSON.parse(configContent)
+    catch e
+      utils.error('found an error in config.json: ' + e.message)
+      process.exit 1
   else
     config = {}
   for k, v of configFromArgs
