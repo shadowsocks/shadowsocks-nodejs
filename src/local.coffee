@@ -44,9 +44,9 @@ inetAton = (ipStr) ->
 
 connections = 0
 
-createServer = (serverAddr, serverPort, port, key, method, timeout)->
+createServer = (serverAddr, serverPort, port, key, method, timeout, local_address=null) ->
   
-  udpServer = udpRelay.createServer(null, port, serverAddr, serverPort, key, method, timeout, true)
+  udpServer = udpRelay.createServer(local_address, port, serverAddr, serverPort, key, method, timeout, true)
   
   getServer = ->
     aPort = serverPort
@@ -260,8 +260,12 @@ createServer = (serverAddr, serverPort, port, key, method, timeout)->
       remote.destroy() if remote
       connection.destroy() if connection
   )
-  server.listen port, ->
-    utils.info "local listening at port " + port
+  if local_address?
+    server.listen port, local_address, ->
+      utils.info "local listening at #{server.address().address}:#{port}"
+  else
+    server.listen port, ->
+      utils.info "local listening at 0.0.0.0:" + port
   
   server.on "error", (e) ->
     if e.code is "EADDRINUSE"
@@ -309,11 +313,12 @@ exports.main = ->
   PORT = config.local_port
   KEY = config.password
   METHOD = config.method
+  local_address = config.local_address
   if not (SERVER and REMOTE_PORT and PORT and KEY)
     utils.warn 'config.json not found, you have to specify all config in commandline'
     process.exit 1
   timeout = Math.floor(config.timeout * 1000) or 600000
-  s = createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout
+  s = createServer SERVER, REMOTE_PORT, PORT, KEY, METHOD, timeout, local_address
   s.on "error", (e) ->
     process.stdout.on 'drain', ->
       process.exit 1

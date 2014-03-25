@@ -1,4 +1,7 @@
-1.4.3 2013-10-29
+1.4.4 2014-03-25
+- Support local address binding with -b argument
+
+1.4.3 2014-02-17
 - Fix bug with ipv6 proxy in utorrent
 - Better error message with bad config.json format and wrong password
 

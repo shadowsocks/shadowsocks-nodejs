@@ -1,7 +1,7 @@
 shadowsocks-nodejs
 ===========
 
-Current version: 1.4.3
+Current version: 1.4.4
 [![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
 
 shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
@@ -57,7 +57,7 @@ Advanced
 
 You can use args to override settings from `config.json`.
 
-    sslocal -s server_name -p server_port -l local_port -k password -m bf-cfb
+    sslocal -s server_name -p server_port -l local_port -k password -m bf-cfb -b local_address
     ssserver -p server_port -k password -m bf-cfb
     ssserver -c /etc/shadowsocks/config.json
 
