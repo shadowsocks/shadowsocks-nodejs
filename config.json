@@ -1,5 +1,5 @@
 {
-    "server":"127.0.0.1",
+    "server":["10.0.1.104", "2002:7b72:2ac3::bae8:56ff:fe3d:103c"],
     "server_port":8388,
     "local_port":1080,
     "password":"barfoo!",

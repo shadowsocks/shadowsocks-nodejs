@@ -1,3 +1,6 @@
+1.4.7 2014-04-12
+- Fix can not bind two or more IPs
+
 1.4.6 2014-04-10
 - Fix a typo in help
 
