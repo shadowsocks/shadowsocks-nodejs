@@ -46,7 +46,7 @@ inetAton = (ipStr) ->
 
 connections = 0
 
-createServer = (serverAddr, serverPort, port, key, method, timeout, local_address=null) ->
+createServer = (serverAddr, serverPort, port, key, method, timeout, local_address='127.0.0.1') ->
   
   udpServer = udpRelay.createServer(local_address, port, serverAddr, serverPort, key, method, timeout, true)
   
