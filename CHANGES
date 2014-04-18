@@ -1,3 +1,7 @@
+1.4.9 2014-04-18
+- Lower local latency
+- Fix a typo in help
+
 1.4.8 2014-04-12
 - Fix can not bind two or more IPs
 
