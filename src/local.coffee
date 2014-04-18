@@ -73,7 +73,6 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
     stage = 0
     headerLength = 0
     remote = null
-    cachedPieces = []
     addrLen = 0
     remoteAddr = null
     remotePort = null
@@ -92,7 +91,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
       if stage is 5
         # pipe sockets
         data = encryptor.encrypt data
-        connection.pause()  unless remote.write(data)
+        connection.pause() unless remote.write(data)
         return
       if stage is 0
         tempBuf = new Buffer(2)
@@ -165,20 +164,6 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
           [aServer, aPort] = getServer()
           utils.info "connecting #{aServer}:#{aPort}"
           remote = net.connect(aPort, aServer, ->
-            if not encryptor
-              remote.destroy() if remote
-              return
-            addrToSendBuf = new Buffer(addrToSend, "binary")
-            addrToSendBuf = encryptor.encrypt addrToSendBuf
-            remote.write addrToSendBuf
-            i = 0
-  
-            while i < cachedPieces.length
-              piece = cachedPieces[i]
-              piece = encryptor.encrypt piece
-              remote.write piece
-              i++
-            cachedPieces = null # save memory
             stage = 5
             utils.debug "stage = 5"
           )
@@ -218,12 +203,17 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
             utils.debug "remote on timeout"
             remote.destroy() if remote
             connection.destroy() if connection
-  
+
+          addrToSendBuf = new Buffer(addrToSend, "binary")
+          addrToSendBuf = encryptor.encrypt addrToSendBuf
+#          remote.setNoDelay false
+          remote.write addrToSendBuf 
+          
           if data.length > headerLength
             buf = new Buffer(data.length - headerLength)
             data.copy buf, 0, headerLength
-            cachedPieces.push buf
-            buf = null
+            piece = encryptor.encrypt buf
+            remote.write piece
           stage = 4
           utils.debug "stage = 4"
         catch e
@@ -231,10 +221,14 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
           utils.error e
           connection.destroy() if connection
           remote.destroy() if remote
-      else cachedPieces.push data  if stage is 4
-        # remote server not connected
-        # cache received buffers
-        # make sure no data is lost
+          clean()
+      else if stage is 4
+        if not remote?
+          connection.destroy() if connection
+          return
+        data = encryptor.encrypt data
+#        remote.setNoDelay true
+        connection.pause() unless remote.write(data)
   
     connection.on "end", ->
       utils.debug "connection on end"

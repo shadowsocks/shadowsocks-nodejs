@@ -103,7 +103,10 @@ exports.config = (level) ->
 
 exports.log = (level, msg)->
   if level >= _logging_level
-    util.log msg
+    if level >= exports.DEBUG
+      util.log(new Date().getMilliseconds() + 'ms ' + msg)
+    else
+      util.log msg
     
 exports.debug = (msg)->
   exports.log exports.DEBUG, msg
