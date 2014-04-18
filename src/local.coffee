@@ -206,7 +206,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
 
           addrToSendBuf = new Buffer(addrToSend, "binary")
           addrToSendBuf = encryptor.encrypt addrToSendBuf
-#          remote.setNoDelay false
+          remote.setNoDelay false
           remote.write addrToSendBuf 
           
           if data.length > headerLength
@@ -227,7 +227,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
           connection.destroy() if connection
           return
         data = encryptor.encrypt data
-#        remote.setNoDelay true
+        remote.setNoDelay true
         connection.pause() unless remote.write(data)
   
     connection.on "end", ->
