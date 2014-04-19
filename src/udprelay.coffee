@@ -228,13 +228,13 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
           if not isLocal
             # on remote, server to client
             # append shadowsocks response header
-            # TODO: support receive from IPv6 addr
             utils.debug "UDP recv from #{rinfo1.address}:#{rinfo1.port}"
-            serverIPBuf = inetAton(rinfo1.address)
-            responseHeader = new Buffer(7)
-            responseHeader.write('\x01', 0)
-            serverIPBuf.copy(responseHeader, 1, 0, 4)
-            responseHeader.writeUInt16BE(rinfo1.port, 5)
+            serverIPBuf = new Buffer(rinfo1.address, 'binary')
+            responseHeader = new Buffer(4 + serverIPBuf.length)
+            responseHeader.write('\x03', 0)
+            responseHeader.writeUInt16LE(serverIPBuf.length, 1)
+            serverIPBuf.copy(responseHeader, 2)
+            responseHeader.writeUInt16BE(rinfo1.port, serverIPBuf.length + 2)
             data2 = Buffer.concat([responseHeader, data1])
             data2 = encrypt(password, method, data2)
             if not data2?
