@@ -9,7 +9,7 @@
         "url": "https://raw.github.com/clowwindy/shadowsocks-nodejs/master/LICENSE"
     }],
     "engines": {
-        "node": ">=0.8.0"
+        "node": ">=0.10.0"
     },
     "directories": {
         "lib": "./lib/shadowsocks"
