@@ -66,12 +66,6 @@ substitute = (table, buf) ->
     i++
   buf
 
-to_buffer = (input) ->
-  if input.copy?
-    return input
-  else
-    return new Buffer(input, 'binary')
-
 bytes_to_key_results = {}
 
 EVP_BytesToKey = (password, key_len, iv_len) ->
@@ -86,7 +80,7 @@ EVP_BytesToKey = (password, key_len, iv_len) ->
     if i > 0
       data = Buffer.concat([m[i - 1], password])
     md5.update(data)
-    d = to_buffer md5.digest()
+    d = md5.digest()
     m.push(d)
     count += d.length
     i += 1
@@ -130,7 +124,7 @@ class Encryptor
 
   get_cipher: (password, method, op, iv) ->
     method = method.toLowerCase()
-    password = Buffer(password, 'binary')
+    password = new Buffer(password, 'binary')
     m = @get_cipher_len(method)
     if m?
       [key, iv_] = EVP_BytesToKey(password, m[0], m[1])
@@ -146,7 +140,7 @@ class Encryptor
 
   encrypt: (buf) ->
     if @method?
-      result = to_buffer @cipher.update(buf.toString('binary'))
+      result = @cipher.update buf
       if @iv_sent
         return result
       else
