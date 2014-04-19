@@ -164,6 +164,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
           [aServer, aPort] = getServer()
           utils.info "connecting #{aServer}:#{aPort}"
           remote = net.connect(aPort, aServer, ->
+            remote.setNoDelay true
             stage = 5
             utils.debug "stage = 5"
           )
