@@ -75,7 +75,7 @@ exports.main = ->
     
   utils.checkConfig config
 
-  timeout = Math.floor(config.timeout * 1000) or 600000
+  timeout = Math.floor(config.timeout * 1000) or 300000
   portPassword = config.port_password
   port = config.server_port
   key = config.password
@@ -163,19 +163,33 @@ exports.main = ->
                   remoteAddr = data.slice(2, 2 + addrLen).toString("binary")
                   remotePort = data.readUInt16BE(2 + addrLen)
                   headerLength = 2 + addrLen + 2
+                
+                # avoid reading from cache before getting connected
+                connection.pause()
+                
                 # connect remote server
                 remote = net.connect(remotePort, remoteAddr, ->
                   utils.info "connecting #{remoteAddr}:#{remotePort}"
-                  if not encryptor
+                  if not encryptor or not remote or not connection
                     remote.destroy() if remote
                     return
                   i = 0
+                  
+                  # now we get connected, resume data flow
+                  connection.resume()
         
                   while i < cachedPieces.length
                     piece = cachedPieces[i]
                     remote.write piece
                     i++
                   cachedPieces = null # save memory
+                   
+                  # use a small timeout for connect()
+                  remote.setTimeout timeout, ->
+                    utils.debug "remote on timeout during connect()"
+                    remote.destroy() if remote
+                    connection.destroy() if connection
+        
                   stage = 5
                   utils.debug "stage = 5"
                 )
@@ -185,7 +199,7 @@ exports.main = ->
                     remote.destroy() if remote
                     return
                   data = encryptor.encrypt data
-                  remote.pause()  unless connection.write(data)
+                  remote.pause() unless connection.write(data)
         
                 remote.on "end", ->
                   utils.debug "remote on end"
@@ -206,8 +220,9 @@ exports.main = ->
                   utils.debug "remote on drain"
                   connection.resume() if connection
         
-                remote.setTimeout timeout, ->
-                  utils.debug "remote on timeout"
+                # use a small timeout for connect()
+                remote.setTimeout 15 * 1000, ->
+                  utils.debug "remote on timeout during connect()"
                   remote.destroy() if remote
                   connection.destroy() if connection
         
