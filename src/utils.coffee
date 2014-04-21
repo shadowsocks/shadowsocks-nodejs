@@ -124,18 +124,19 @@ exports.error = (msg)->
   exports.log exports.ERROR, msg
 
 setInterval(->
-  exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
-  if global.gc
-    exports.debug 'GC'
-    gc()
+  if _logging_level <= exports.DEBUG
     exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
-    cwd = process.cwd()
-    if _logging_level == exports.DEBUG
-      try
-        heapdump = require 'heapdump'
-        process.chdir '/tmp'
-  #        heapdump.writeSnapshot()
-        process.chdir cwd
-      catch e
-        exports.debug e
+    if global.gc
+      exports.debug 'GC'
+      gc()
+      exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
+      cwd = process.cwd()
+      if _logging_level == exports.DEBUG
+        try
+          heapdump = require 'heapdump'
+          process.chdir '/tmp'
+    #        heapdump.writeSnapshot()
+          process.chdir cwd
+        catch e
+          exports.debug e
 , 1000)
