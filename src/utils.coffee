@@ -25,7 +25,7 @@ util = require 'util'
 
 printLocalHelp = ->
     console.log """
-                usage: sslocal [-h] -s SERVER_ADDR -p SERVER_PORT [-b LOCAL_ADDR] -l LOCAL_PORT -k PASSWORD -m METHOD [-c config]
+                usage: sslocal [-h] -s SERVER_ADDR -p SERVER_PORT [-b LOCAL_ADDR] -l LOCAL_PORT -k PASSWORD -m METHOD [-t TIMEOUT] [-c config]
                 
                 optional arguments:
                   -h, --help            show this help message and exit
@@ -35,12 +35,13 @@ printLocalHelp = ->
                   -l LOCAL_PORT         local port
                   -k PASSWORD           password
                   -m METHOD             encryption method, for example, aes-256-cfb
+                  -t TIMEOUT            timeout in seconds
                   -c CONFIG             path to config file
                 """
 
 printServerHelp = ->
     console.log """
-                usage: ssserver [-h] -s SERVER_ADDR -p SERVER_PORT -k PASSWORD -m METHOD [-c config]
+                usage: ssserver [-h] -s SERVER_ADDR -p SERVER_PORT -k PASSWORD -m METHOD [-t TIMEOUT] [-c config]
                 
                 optional arguments:
                   -h, --help            show this help message and exit
@@ -48,6 +49,7 @@ printServerHelp = ->
                   -p SERVER_PORT        server port
                   -k PASSWORD           password
                   -m METHOD             encryption method, for example, aes-256-cfb
+                  -t TIMEOUT            timeout in seconds
                   -c CONFIG             path to config file
                 """
 
@@ -59,7 +61,8 @@ exports.parseArgs = (isServer=false)->
     '-k': 'password',
     '-c': 'config_file',
     '-m': 'method',
-    '-b': 'local_address'
+    '-b': 'local_address',
+    '-t': 'timeout'
 
   result = {}
   nextIsValue = false
