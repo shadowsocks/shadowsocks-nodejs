@@ -124,8 +124,8 @@ exports.error = (msg)->
   exports.log exports.ERROR, msg
 
 setInterval(->
+  exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
   if global.gc
-    exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
     exports.debug 'GC'
     gc()
     exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
@@ -134,7 +134,7 @@ setInterval(->
       try
         heapdump = require 'heapdump'
         process.chdir '/tmp'
-#        heapdump.writeSnapshot()
+  #        heapdump.writeSnapshot()
         process.chdir cwd
       catch e
         exports.debug e
