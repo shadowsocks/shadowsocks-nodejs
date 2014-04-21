@@ -29,7 +29,8 @@ Create a file named `config.json`, with the following content.
         "local_port":1080,
         "password":"barfoo!",
         "timeout":600,
-        "method":"table"
+        "method":"table",
+        "local_address":"127.0.0.1"
     }
 
 Explaination of the fields:
@@ -40,6 +41,7 @@ Explaination of the fields:
     password        a password used to encrypt transfer
     timeout         in seconds
     method          encryption method, "bf-cfb", "aes-256-cfb", "des-cfb", "rc4", etc. Default is table
+    local_address   local binding address, leave it alone if you don't know what it means
 
 `cd` into the directory of `config.json`. Run `ssserver` on your server. To run it in the background, run
 `nohup ssserver > log &`.
