@@ -60,7 +60,7 @@ Advanced
 You can use args to override settings from `config.json`.
 
     sslocal -s server_name -p server_port -l local_port -k password -m bf-cfb -b local_address
-    ssserver -p server_port -k password -m bf-cfb
+    ssserver -p server_port -k password -m bf-cfb -t timeout
     ssserver -c /etc/shadowsocks/config.json
 
 Example of multi-user server support can be found in `test/config-multi-passwd.json`.
