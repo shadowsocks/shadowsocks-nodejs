@@ -22,6 +22,7 @@
 
 
 util = require 'util'
+pack = require '../../package.json'
 
 printLocalHelp = ->
     console.log """
@@ -91,7 +92,7 @@ exports.checkConfig = (config) ->
   if (config.method or '').toLowerCase() == 'rc4'
     exports.warn 'RC4 is not safe; please use a safer cipher, like AES-256-CFB'
 
-exports.version = "shadowsocks-nodejs v1.4.12"
+exports.version = "#{pack.name} v#{pack.version}"
 
 exports.EVERYTHING = 0
 exports.DEBUG = 1
