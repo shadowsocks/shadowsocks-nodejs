@@ -53,6 +53,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
      
   server = net.createServer((connection) ->
     connections += 1
+    connected = true
     encryptor = new Encryptor(key, method)
     stage = 0
     headerLength = 0
@@ -153,6 +154,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
             utils.debug "stage = 5"
           )
           remote.on "data", (data) ->
+            return if !connected     # returns when connection disconnected
             utils.log utils.EVERYTHING, "remote on data"
             try
               if encryptor
@@ -216,6 +218,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
         connection.pause() unless remote.write(data)
   
     connection.on "end", ->
+      connected = false
       utils.debug "connection on end"
       remote.end()  if remote
   
@@ -224,6 +227,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
       utils.error "local error: #{e}"
 
     connection.on "close", (had_error)->
+      connected = false
       utils.debug "connection on close:#{had_error}"
       if had_error
         remote.destroy() if remote
