@@ -25,21 +25,6 @@ utils = require('./utils')
 inet = require('./inet')
 encryptor = require('./encrypt')
 
-inetNtoa = (buf) ->
-  buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
-inetAton = (ipStr) ->
-  parts = ipStr.split(".")
-  unless parts.length is 4
-    null
-  else
-    buf = new Buffer(4)
-    i = 0
-
-    while i < 4
-      buf[i] = +parts[i]
-      i++
-    buf
-
 dgram = require 'dgram'
 net = require 'net'
 
@@ -149,7 +134,7 @@ parseHeader = (data, requestHeaderOffset) ->
     utils.warn "unsupported addrtype: " + addrtype
     return null
   if addrtype is 1
-    destAddr = inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
+    destAddr = utils.inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
     destPort = data.readUInt16BE(requestHeaderOffset + 5)
     headerLength = requestHeaderOffset + 7
   else if addrtype is 4
@@ -230,7 +215,7 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
             # append shadowsocks response header
             # TODO: support receive from IPv6 addr
             utils.debug "UDP recv from #{rinfo1.address}:#{rinfo1.port}"
-            serverIPBuf = inetAton(rinfo1.address)
+            serverIPBuf = utils.inetAton(rinfo1.address)
             responseHeader = new Buffer(7)
             responseHeader.write('\x01', 0)
             serverIPBuf.copy(responseHeader, 1, 0, 4)
