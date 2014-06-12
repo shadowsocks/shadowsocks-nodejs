@@ -1,20 +1,14 @@
 shadowsocks-nodejs
 ===========
 
-Current version: 1.4.12
-[![Build Status](https://travis-ci.org/clowwindy/shadowsocks-nodejs.png)](https://travis-ci.org/clowwindy/shadowsocks-nodejs)
+[![NPM version]][NPM] [![Build Status]][Travis CI]
 
-shadowsocks-nodejs is a lightweight tunnel proxy which can help you get through
- firewalls. It is a port of [shadowsocks](https://github.com/clowwindy/shadowsocks).
-
-Both TCP CONNECT and UDP ASSOCIATE are implemented.
-
-Other ports and clients can be found [here](https://github.com/clowwindy/shadowsocks/wiki/Ports-and-Clients).
+shadowsocks-nodejs is a node.js port of [shadowsocks].
 
 Usage
 -----------
 
-Download the lastest Node stable release. You can find them [here](http://nodejs.org/). Don't just use master branch of
+Download the lastest [Node stable] release. Don't just use master branch of
 Node source code from Github! It's not stable.
 
 Run
@@ -43,8 +37,7 @@ Explaination of the fields:
     method          encryption method, "bf-cfb", "aes-256-cfb", "des-cfb", "rc4", etc. Default is table
     local_address   local binding address, leave it alone if you don't know what it means
 
-`cd` into the directory of `config.json`. Run `ssserver` on your server. To run it in the background, run
-`nohup ssserver > log &`.
+`cd` into the directory of `config.json`. Run `ssserver` on your server. Use [Supervisor].
 
 On your client machine, run `sslocal`.
 
@@ -79,8 +72,19 @@ MIT
 
 Bugs and Issues
 ----------------
-Please visit [issue tracker](https://github.com/clowwindy/shadowsocks-nodejs/issues?state=open)
+Please visit [Issue Tracker]
 
 Mailing list: http://groups.google.com/group/shadowsocks
 
-Also see [troubleshooting](https://github.com/clowwindy/shadowsocks/wiki/Troubleshooting)
+Also see [Troubleshooting]
+
+
+[Build Status]:    https://img.shields.io/travis/clowwindy/shadowsocks-nodejs/master.svg?style=flat
+[Issue Tracker]:   https://github.com/clowwindy/shadowsocks-nodejs/issues?state=open
+[NPM]:             https://pypi.python.org/npm/shadowsocks
+[NPM version]:     https://img.shields.io/npm/v/shadowsocks.svg?style=flat
+[Travis CI]:       https://travis-ci.org/clowwindy/shadowsocks-nodejs
+[shadowsocks]:     https://github.com/clowwindy/shadowsocks
+[Supervisor]:      https://github.com/clowwindy/shadowsocks-nodejs/wiki/Configure-Shadowsocks-nodejs-with-Supervisor
+[Node stable]:     http://nodejs.org/
+[Troubleshooting]: https://github.com/clowwindy/shadowsocks/wiki/Troubleshooting
