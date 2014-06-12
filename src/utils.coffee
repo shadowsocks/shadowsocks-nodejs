@@ -122,7 +122,7 @@ exports.warn = (msg)->
   exports.log exports.WARN, msg 
   
 exports.error = (msg)->
-  exports.log exports.ERROR, msg
+  exports.log exports.ERROR, msg?.stack or msg
 
 exports.inetNtoa = (buf) ->
   buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
