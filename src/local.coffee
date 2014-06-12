@@ -28,22 +28,6 @@ udpRelay = require("./udprelay")
 utils = require('./utils')
 inet = require('./inet')
 Encryptor = require("./encrypt").Encryptor
-
-inetNtoa = (buf) ->
-  buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
-inetAton = (ipStr) ->
-  parts = ipStr.split(".")
-  unless parts.length is 4
-    null
-  else
-    buf = new Buffer(4)
-    i = 0
-
-    while i < 4
-      buf[i] = +parts[i]
-      i++
-    buf
-
 connections = 0
 
 createServer = (serverAddr, serverPort, port, key, method, timeout, local_address='127.0.0.1') ->
@@ -119,7 +103,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
             reply = new Buffer(10)
             reply.write "\u0005\u0000\u0000\u0001", 0, 4, "binary"
             utils.debug connection.localAddress
-            inetAton(connection.localAddress).copy reply, 4
+            utils.inetAton(connection.localAddress).copy reply, 4
             reply.writeUInt16BE connection.localPort, 8
             connection.write reply
             stage = 10
@@ -137,7 +121,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
           addrToSend = data.slice(3, 4).toString("binary")
           # read address and port
           if addrtype is 1
-            remoteAddr = inetNtoa(data.slice(4, 8))
+            remoteAddr = utils.inetNtoa(data.slice(4, 8))
             addrToSend += data.slice(4, 10).toString("binary")
             remotePort = data.readUInt16BE(8)
             headerLength = 10

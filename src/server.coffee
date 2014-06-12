@@ -32,22 +32,6 @@ Encryptor = require("./encrypt").Encryptor
 exports.main = ->
   
   console.log(utils.version)
-  
-  inetNtoa = (buf) ->
-    buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
-  inetAton = (ipStr) ->
-    parts = ipStr.split(".")
-    unless parts.length is 4
-      null
-    else
-      buf = new Buffer(4)
-      i = 0
-  
-      while i < 4
-        buf[i] = +parts[i]
-        i++
-      buf
-  
   configFromArgs = utils.parseArgs(true)
   configPath = 'config.json'
   if configFromArgs.config_file
@@ -152,7 +136,7 @@ exports.main = ->
                   return
                 # read address and port
                 if addrtype is 1
-                  remoteAddr = inetNtoa(data.slice(1, 5))
+                  remoteAddr = utils.inetNtoa(data.slice(1, 5))
                   remotePort = data.readUInt16BE(5)
                   headerLength = 7
                 else if addrtype is 4

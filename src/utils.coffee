@@ -124,6 +124,21 @@ exports.warn = (msg)->
 exports.error = (msg)->
   exports.log exports.ERROR, msg
 
+exports.inetNtoa = (buf) ->
+  buf[0] + "." + buf[1] + "." + buf[2] + "." + buf[3]
+  
+exports.inetAton = (ipStr) ->
+  parts = ipStr.split(".")
+  unless parts.length is 4
+    null
+  else
+    buf = new Buffer(4)
+    i = 0
+    while i < 4
+      buf[i] = +parts[i]
+      i++
+    buf
+
 setInterval(->
   if _logging_level <= exports.DEBUG
     exports.debug(JSON.stringify(process.memoryUsage(), ' ', 2))
