@@ -5,7 +5,7 @@ shadowsocks-nodejs
 
 shadowsocks-nodejs is a node.js port of [shadowsocks].
 
-Deprecated; please use [Python] or [libev] version.
+**Deprecated; please use [Python] or [libev] version.**
 
 Usage
 -----------
