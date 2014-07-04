@@ -83,7 +83,7 @@ Also see [Troubleshooting]
 
 [Build Status]:    https://img.shields.io/travis/clowwindy/shadowsocks-nodejs/master.svg?style=flat
 [Issue Tracker]:   https://github.com/clowwindy/shadowsocks-nodejs/issues?state=open
-[NPM]:             https://pypi.python.org/npm/shadowsocks
+[NPM]:             https://www.npmjs.org/package/shadowsocks
 [NPM version]:     https://img.shields.io/npm/v/shadowsocks.svg?style=flat
 [libev]:           https://github.com/madeye/shadowsocks-libev
 [Python]:          https://github.com/clowwindy/shadowsocks
