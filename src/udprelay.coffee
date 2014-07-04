@@ -127,25 +127,29 @@ decrypt = (password, method, data) ->
     return null
 
 parseHeader = (data, requestHeaderOffset) ->
-  addrtype = data[requestHeaderOffset]
-  if addrtype is 3
-    addrLen = data[requestHeaderOffset + 1]
-  else unless addrtype in [1, 4]
-    utils.warn "unsupported addrtype: " + addrtype
+  try
+    addrtype = data[requestHeaderOffset]
+    if addrtype is 3
+      addrLen = data[requestHeaderOffset + 1]
+    else unless addrtype in [1, 4]
+      utils.warn "unsupported addrtype: " + addrtype
+      return null
+    if addrtype is 1
+      destAddr = utils.inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
+      destPort = data.readUInt16BE(requestHeaderOffset + 5)
+      headerLength = requestHeaderOffset + 7
+    else if addrtype is 4
+      destAddr = inet.inet_ntop(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 17))
+      destPort = data.readUInt16BE(requestHeaderOffset + 17)
+      headerLength = requestHeaderOffset + 19
+    else
+      destAddr = data.slice(requestHeaderOffset + 2, requestHeaderOffset + 2 + addrLen).toString("binary")
+      destPort = data.readUInt16BE(requestHeaderOffset + 2 + addrLen)
+      headerLength = requestHeaderOffset + 2 + addrLen + 2
+    return [addrtype, destAddr, destPort, headerLength]
+  catch e
+    utils.error e
     return null
-  if addrtype is 1
-    destAddr = utils.inetNtoa(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 5))
-    destPort = data.readUInt16BE(requestHeaderOffset + 5)
-    headerLength = requestHeaderOffset + 7
-  else if addrtype is 4
-    destAddr = inet.inet_ntop(data.slice(requestHeaderOffset + 1, requestHeaderOffset + 17))
-    destPort = data.readUInt16BE(requestHeaderOffset + 17)
-    headerLength = requestHeaderOffset + 19
-  else
-    destAddr = data.slice(requestHeaderOffset + 2, requestHeaderOffset + 2 + addrLen).toString("binary")
-    destPort = data.readUInt16BE(requestHeaderOffset + 2 + addrLen)
-    headerLength = requestHeaderOffset + 2 + addrLen + 2
-  return [addrtype, destAddr, destPort, headerLength]
  
 
 exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort, 
@@ -233,7 +237,11 @@ exports.createServer = (listenAddr, listenPort, remoteAddr, remotePort,
             if not data1?
               # drop
               return
-            [addrtype, destAddr, destPort, headerLength] = parseHeader(data1, 0)
+            headerResult = parseHeader(data1, 0)
+            if headerResult == null
+              # drop
+              return
+            [addrtype, destAddr, destPort, headerLength] = headerResult
             utils.debug "UDP recv from #{destAddr}:#{destPort}"
             data2 = Buffer.concat([responseHeader, data1])
           server.send data2, 0, data2.length, rinfo.port, rinfo.address, (err, bytes) ->

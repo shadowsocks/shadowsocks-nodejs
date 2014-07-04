@@ -1,3 +1,6 @@
+1.4.14 2014-07-04
+- Fix UDP header length detection
+
 1.4.13 2014-06-12
 - Better logging
 - Extract the 2 function inetNtoa and inetAton to utils
