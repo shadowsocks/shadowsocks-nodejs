@@ -12,6 +12,12 @@ Many people are asking why. Here's why.
 - https://github.com/clowwindy/shadowsocks-nodejs/issues/35
 - https://github.com/joyent/node/issues/5949
 
+The GC of node.js sucks.
+
+Python version handles 5000 connections with 50MB RAM while node.js version
+handles 100 connections with 300MB RAM. Why should we continue to support
+node.js?
+
 Usage
 -----------
 
