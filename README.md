@@ -5,7 +5,7 @@ shadowsocks-nodejs
 
 shadowsocks-nodejs is a node.js port of [shadowsocks].
 
-**Deprecated; please use [Python] or [libev] version.**
+**Deprecated; please use [Other versions].**
 
 Many people are asking why. Here's why.
 
@@ -94,12 +94,11 @@ Also see [Troubleshooting]
 
 [Build Status]:    https://img.shields.io/travis/clowwindy/shadowsocks-nodejs/master.svg?style=flat
 [Issue Tracker]:   https://github.com/clowwindy/shadowsocks-nodejs/issues?state=open
+[Node stable]:     http://nodejs.org/
 [NPM]:             https://www.npmjs.org/package/shadowsocks
-[NPM version]:     https://img.shields.io/npm/v/shadowsocks.svg?style=flat
-[libev]:           https://github.com/madeye/shadowsocks-libev
-[Python]:          https://github.com/clowwindy/shadowsocks
+[NPM version]:     https://img.shields.io/npm/v/shadowsocks.svg?style=flatp
 [Travis CI]:       https://travis-ci.org/clowwindy/shadowsocks-nodejs
 [shadowsocks]:     https://github.com/clowwindy/shadowsocks
 [Supervisor]:      https://github.com/clowwindy/shadowsocks-nodejs/wiki/Configure-Shadowsocks-nodejs-with-Supervisor
-[Node stable]:     http://nodejs.org/
+[Other versions]:  https://github.com/clowwindy/shadowsocks/wiki/Ports-and-Clients
 [Troubleshooting]: https://github.com/clowwindy/shadowsocks/wiki/Troubleshooting
