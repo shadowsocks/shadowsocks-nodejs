@@ -104,7 +104,19 @@ method_supported =
   'idea-cfb': [16, 8]
   'rc2-cfb': [16, 8]
   'rc4': [16, 0]
+  'rc4-md5': [16, 16]
   'seed-cfb': [16, 16]
+
+
+create_rc4_md5_cipher = (key, iv, op) ->
+  md5 = crypto.createHash('md5')
+  md5.update(key)
+  md5.update(iv)
+  rc4_key = md5.digest()
+  if op == 1
+    return crypto.createCipheriv('rc4', rc4_key, '')
+  else
+    return crypto.createDecipheriv('rc4', rc4_key, '')
 
 
 class Encryptor
@@ -133,10 +145,13 @@ class Encryptor
       if op == 1
         @cipher_iv = iv.slice(0, m[1])
       iv = iv.slice(0, m[1])
-      if op == 1
-        return crypto.createCipheriv(method, key, iv)
+      if method == 'rc4-md5'
+        return create_rc4_md5_cipher(key, iv, op)
       else
-        return crypto.createDecipheriv(method, key, iv)
+        if op == 1
+          return crypto.createCipheriv(method, key, iv)
+        else
+          return crypto.createDecipheriv(method, key, iv)
 
   encrypt: (buf) ->
     if @method?
@@ -184,10 +199,13 @@ encryptAll = (password, method, op, data) ->
     else
       iv = data.slice 0, ivLen
       data = data.slice ivLen
-    if op == 1
-      cipher = crypto.createCipheriv(method, key, iv)
+    if method == 'rc4-md5'
+      cipher = create_rc4_md5_cipher(key, iv, op)
     else
-      cipher = crypto.createDecipheriv(method, key, iv)
+      if op == 1
+        cipher = crypto.createCipheriv(method, key, iv)
+      else
+        cipher = crypto.createDecipheriv(method, key, iv)
     result.push cipher.update(data)
     result.push cipher.final()
     return Buffer.concat result
