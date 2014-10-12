@@ -1,3 +1,6 @@
+1.5.2 2014-09-09
+- Fix IPv6 address on client side
+
 1.5.1 2014-09-09
 - Fix wrong key cached when changing method on the fly
 
