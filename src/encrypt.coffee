@@ -69,8 +69,8 @@ substitute = (table, buf) ->
 bytes_to_key_results = {}
 
 EVP_BytesToKey = (password, key_len, iv_len) ->
-  if bytes_to_key_results[password]
-    return bytes_to_key_results[password]
+  if bytes_to_key_results["#{password}:#{key_len}:#{iv_len}"]
+    return bytes_to_key_results["#{password}:#{key_len}:#{iv_len}"]
   m = []
   i = 0
   count = 0
