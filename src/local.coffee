@@ -43,7 +43,7 @@ createServer = (serverAddr, serverPort, port, key, method, timeout, local_addres
     if serverAddr instanceof Array
       # support config like "server": ["123.123.123.1", "123.123.123.2"]
       aServer = serverAddr[Math.floor(Math.random() * serverAddr .length)]
-    r = /^[^:]*\:(\d+)$/.exec(aServer)
+    r = /^([^:]*)\:(\d+)$/.exec(aServer)
     # support config like "server": "123.123.123.1:8381"
     # or "server": ["123.123.123.1:8381", "123.123.123.2:8381", "123.123.123.2:8382"]
     if r?

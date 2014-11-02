@@ -1,3 +1,6 @@
+1.5.3 2014-11-01
+- Fix multiple servers on local side
+
 1.5.2 2014-09-09
 - Fix IPv6 address on client side
 
